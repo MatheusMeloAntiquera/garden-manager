@@ -1,2 +1,2 @@
-# garden--manager
+# garden-manager
 Aplicação de Gerenciamento de Jardins
