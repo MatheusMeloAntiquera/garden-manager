@@ -1,0 +1,171 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-09-25T23:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v8.0.0",
+  "resources": [
+    {
+      "_id": "wrk_garden_manager_auth",
+      "_type": "workspace",
+      "parentId": null,
+      "name": "Garden Manager - Auth",
+      "description": "Rotas de autenticação da API do garden-manager (signup, login, refresh, logout, users/me).",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_garden_manager_base",
+      "_type": "environment",
+      "parentId": "wrk_garden_manager_auth",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:8080",
+        "access_token": "",
+        "refresh_token": ""
+      },
+      "dataPropertyOrder": {
+        "&": ["base_url", "access_token", "refresh_token"]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1
+    },
+    {
+      "_id": "fld_auth",
+      "_type": "request_group",
+      "parentId": "wrk_garden_manager_auth",
+      "name": "Auth",
+      "description": "",
+      "metaSortKey": 1
+    },
+    {
+      "_id": "req_signup",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Signup",
+      "description": "Cria uma nova conta.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/v1/auth/signup",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Maria Teste\",\n  \"email\": \"maria@example.com\",\n  \"password\": \"Sup3r$ecret1\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 1,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_login",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Login",
+      "description": "Autentica e retorna o par access_token/refresh_token.\n\nO after-response script grava os dois tokens direto nas variáveis de ambiente access_token e refresh_token.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/v1/auth/login",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"maria@example.com\",\n  \"password\": \"Sup3r$ecret1\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "afterResponseScript": "if (insomnia.response.code === 200) {\n  const body = insomnia.response.json();\n  insomnia.environment.set('access_token', body.access_token);\n  insomnia.environment.set('refresh_token', body.refresh_token);\n  console.log('Tokens atualizados no environment.');\n} else {\n  console.log('Login falhou, tokens não foram atualizados. Status:', insomnia.response.code);\n}",
+      "metaSortKey": 2,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_users_me",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Get Me",
+      "description": "Retorna os dados do usuário autenticado. Requer o header Authorization com o access_token do login.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/v1/users/me",
+      "body": {},
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 3,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_refresh",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Refresh",
+      "description": "Troca um refresh_token válido por um novo par de tokens (rotação: o refresh_token antigo é revogado).\n\nO after-response script atualiza access_token e refresh_token com os novos valores.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/v1/auth/refresh",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"refresh_token\": \"{{ _.refresh_token }}\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "afterResponseScript": "if (insomnia.response.code === 200) {\n  const body = insomnia.response.json();\n  insomnia.environment.set('access_token', body.access_token);\n  insomnia.environment.set('refresh_token', body.refresh_token);\n  console.log('Tokens atualizados no environment.');\n} else {\n  console.log('Refresh falhou, tokens não foram atualizados. Status:', insomnia.response.code);\n}",
+      "metaSortKey": 4,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_logout",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Logout",
+      "description": "Revoga o refresh_token informado. O access_token em uso continua válido até expirar.\n\nO after-response script limpa os tokens do environment quando o logout dá certo (204).",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/v1/auth/logout",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"refresh_token\": \"{{ _.refresh_token }}\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "afterResponseScript": "if (insomnia.response.code === 204) {\n  insomnia.environment.set('access_token', '');\n  insomnia.environment.set('refresh_token', '');\n  console.log('Logout confirmado, tokens limpos do environment.');\n} else {\n  console.log('Logout falhou. Status:', insomnia.response.code);\n}",
+      "metaSortKey": 5,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    }
+  ]
+}

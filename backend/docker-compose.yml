@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-garden}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-garden}
+      POSTGRES_DB: ${POSTGRES_DB:-garden_manager}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - garden_manager_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-garden} -d ${POSTGRES_DB:-garden_manager}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    image: migrate/migrate:v4.17.1
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/migrations
+    command:
+      - "-path=/migrations"
+      - "-database=postgres://${POSTGRES_USER:-garden}:${POSTGRES_PASSWORD:-garden}@postgres:5432/${POSTGRES_DB:-garden_manager}?sslmode=disable"
+      - "up"
+
+volumes:
+  garden_manager_postgres_data:
