@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	validatorpkg "github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 
 	"github.com/matheusantiquera/garden-manager/backend/domain"
@@ -185,9 +186,10 @@ func signupTestUser(t *testing.T, svc Service, email, password string) UserRespo
 	t.Helper()
 
 	user, err := svc.Signup(context.Background(), SignupInput{
-		Name:     "Usuário Teste",
-		Email:    email,
-		Password: password,
+		Name:      "Usuário Teste",
+		Email:     email,
+		Password:  password,
+		BirthDate: "1990-05-20",
 	})
 	if err != nil {
 		t.Fatalf("Signup retornou erro: %v", err)
@@ -216,9 +218,39 @@ func TestSignupDuplicateEmail(t *testing.T) {
 
 	signupTestUser(t, svc, "duplicado@example.com", "Sup3r$ecret")
 
-	_, err := svc.Signup(ctx, SignupInput{Name: "Outro", Email: "duplicado@example.com", Password: "Sup3r$ecret"})
+	_, err := svc.Signup(ctx, SignupInput{
+		Name:      "Outro",
+		Email:     "duplicado@example.com",
+		Password:  "Sup3r$ecret",
+		BirthDate: "1985-01-10",
+	})
 	if !errors.Is(err, ErrEmailTaken) {
 		t.Fatalf("esperava ErrEmailTaken, obteve: %v", err)
+	}
+}
+
+func TestSignupReturnsBirthDate(t *testing.T) {
+	svc, _ := newTestService(t)
+
+	user := signupTestUser(t, svc, "aniversario@example.com", "Sup3r$ecret")
+
+	if user.BirthDate == nil || *user.BirthDate != "1990-05-20" {
+		t.Fatalf("esperava birth_date 1990-05-20, obteve: %v", user.BirthDate)
+	}
+}
+
+func TestSignupRequiresBirthDate(t *testing.T) {
+	svc, _ := newTestService(t)
+
+	_, err := svc.Signup(context.Background(), SignupInput{
+		Name:     "Sem Data",
+		Email:    "sem-data@example.com",
+		Password: "Sup3r$ecret",
+	})
+
+	var validationErrs validatorpkg.ValidationErrors
+	if !errors.As(err, &validationErrs) {
+		t.Fatalf("esperava erro de validação, obteve: %v", err)
 	}
 }
 

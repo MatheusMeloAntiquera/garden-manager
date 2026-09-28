@@ -106,7 +106,7 @@ O logout revoga o refresh token informado. Como a estratégia usa access + refre
 # Criar conta
 curl -X POST http://localhost:8080/api/v1/auth/signup \
   -H "Content-Type: application/json" \
-  -d '{"name":"Maria","email":"maria@example.com","password":"Sup3r$ecret"}'
+  -d '{"name":"Maria","email":"maria@example.com","password":"Sup3r$ecret","birth_date":"1990-05-20"}'
 
 # Login
 curl -X POST http://localhost:8080/api/v1/auth/login \

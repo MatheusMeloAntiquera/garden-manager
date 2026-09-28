@@ -55,13 +55,13 @@ func NewRepository(pool *pgxpool.Pool) Repository {
 
 func (r *postgresRepository) CreateUser(ctx context.Context, user domain.User) (domain.User, error) {
 	const query = `
-		INSERT INTO users (name, email, password)
-		VALUES ($1, $2, $3)
+		INSERT INTO users (name, email, password, birth_date)
+		VALUES ($1, $2, $3, $4)
 		RETURNING id, name, email, password, login_attempts, blocked, active,
-			email_verified_at, created_at, updated_at
+			birth_date, email_verified_at, created_at, updated_at
 	`
 
-	row := r.pool.QueryRow(ctx, query, user.Name, user.Email, user.Password)
+	row := r.pool.QueryRow(ctx, query, user.Name, user.Email, user.Password, user.BirthDate)
 
 	created, err := scanUser(row)
 	if err != nil {
@@ -78,7 +78,7 @@ func (r *postgresRepository) CreateUser(ctx context.Context, user domain.User) (
 func (r *postgresRepository) FindUserByEmail(ctx context.Context, email string) (domain.User, error) {
 	const query = `
 		SELECT id, name, email, password, login_attempts, blocked, active,
-			email_verified_at, created_at, updated_at
+			birth_date, email_verified_at, created_at, updated_at
 		FROM users
 		WHERE email = $1
 	`
@@ -97,7 +97,7 @@ func (r *postgresRepository) FindUserByEmail(ctx context.Context, email string) 
 func (r *postgresRepository) FindUserByID(ctx context.Context, id uuid.UUID) (domain.User, error) {
 	const query = `
 		SELECT id, name, email, password, login_attempts, blocked, active,
-			email_verified_at, created_at, updated_at
+			birth_date, email_verified_at, created_at, updated_at
 		FROM users
 		WHERE id = $1
 	`
@@ -158,7 +158,7 @@ func (r *postgresRepository) FindRefreshTokenWithUser(ctx context.Context, token
 		SELECT
 			rt.id, rt.user_id, rt.token_hash, rt.expires_at, rt.revoked_at, rt.created_at,
 			u.id, u.name, u.email, u.password, u.login_attempts, u.blocked, u.active,
-			u.email_verified_at, u.created_at, u.updated_at
+			u.birth_date, u.email_verified_at, u.created_at, u.updated_at
 		FROM refresh_tokens rt
 		JOIN users u ON u.id = rt.user_id
 		WHERE rt.token_hash = $1
@@ -170,7 +170,7 @@ func (r *postgresRepository) FindRefreshTokenWithUser(ctx context.Context, token
 	err := r.pool.QueryRow(ctx, query, tokenHash).Scan(
 		&rt.ID, &rt.UserID, &rt.TokenHash, &rt.ExpiresAt, &rt.RevokedAt, &rt.CreatedAt,
 		&user.ID, &user.Name, &user.Email, &user.Password, &user.LoginAttempts, &user.Blocked, &user.Active,
-		&user.EmailVerifiedAt, &user.CreatedAt, &user.UpdatedAt,
+		&user.BirthDate, &user.EmailVerifiedAt, &user.CreatedAt, &user.UpdatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -228,7 +228,7 @@ func scanUser(row rowScanner) (domain.User, error) {
 	var u domain.User
 	err := row.Scan(
 		&u.ID, &u.Name, &u.Email, &u.Password, &u.LoginAttempts, &u.Blocked, &u.Active,
-		&u.EmailVerifiedAt, &u.CreatedAt, &u.UpdatedAt,
+		&u.BirthDate, &u.EmailVerifiedAt, &u.CreatedAt, &u.UpdatedAt,
 	)
 	if err != nil {
 		return domain.User{}, err
