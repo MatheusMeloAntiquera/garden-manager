@@ -10,8 +10,9 @@ O projeto segue o [Package Oriented Design](https://www.gobeyond.dev/packages-as
 backend/
 ├── cmd/api          # ponto de entrada da aplicação (main.go)
 ├── config           # carregamento de configuração via variáveis de ambiente
-├── domain           # tipos de domínio (User, RefreshToken)
+├── domain           # tipos de domínio (User, RefreshToken, Environment)
 ├── internal/auth    # domínio de autenticação: dto, service, repository, handler
+├── internal/environment # domínio de ambientes: dto, service, repository, handler
 ├── pkg              # código reutilizável: postgres, password, token, validator, httpx, logger
 └── migrations       # migrations SQL do banco
 ```
@@ -100,6 +101,44 @@ O logout revoga o refresh token informado. Como a estratégia usa access + refre
 - A coluna `users.email_verified_at` já existe, para permitir vincular contas por e-mail verificado.
 - O login por senha rejeita contas sem senha cadastrada.
 
+## Ambientes
+
+Um ambiente é o espaço onde as plantas ficam (sala, cozinha, área externa…); o nome é livre e pode se repetir. Cada ambiente pertence ao usuário que o criou: todas as rotas exigem `Authorization: Bearer <access_token>` e só enxergam os ambientes do próprio usuário. Ambientes de outro usuário respondem `404`.
+
+### Rotas
+
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | `/api/v1/environments` | Cria um ambiente (`201`) |
+| GET | `/api/v1/environments` | Lista os ambientes do usuário, ordenados por nome |
+| GET | `/api/v1/environments/{id}` | Retorna um ambiente |
+| PUT | `/api/v1/environments/{id}` | Substitui nome, observações e status do ambiente |
+| DELETE | `/api/v1/environments/{id}` | Exclui o ambiente definitivamente (`204`) |
+
+### Campos
+
+| Campo | Regras |
+|---|---|
+| `name` | obrigatório, até 100 caracteres (espaços nas pontas são removidos) |
+| `notes` | opcional, até 2000 caracteres; em branco vira `null` |
+| `active` | opcional no POST (padrão `true`); obrigatório no PUT |
+
+Como o PUT substitui o recurso inteiro, omitir `notes` nele limpa as observações.
+
+### Listagem
+
+Parâmetros de query (todos opcionais):
+
+- `page`: página, a partir de 1 (padrão 1);
+- `page_size`: itens por página, de 1 a 100 (padrão 20);
+- `active`: `true` ou `false`, filtra pelo status. Sem ele, lista ativos e inativos.
+
+Resposta:
+
+```json
+{ "data": [ { "id": "…", "name": "Cozinha", "notes": null, "active": true, "created_at": "…", "updated_at": "…" } ], "page": 1, "page_size": 20, "total": 1 }
+```
+
 ## Exemplos (curl)
 
 ```bash
@@ -126,4 +165,16 @@ curl -X POST http://localhost:8080/api/v1/auth/refresh \
 curl -X POST http://localhost:8080/api/v1/auth/logout \
   -H "Content-Type: application/json" \
   -d '{"refresh_token":"<refresh_token>"}'
+
+# Criar ambiente
+curl -X POST http://localhost:8080/api/v1/environments   -H "Authorization: Bearer <access_token>"   -H "Content-Type: application/json"   -d '{"name":"Cozinha","notes":"Janela voltada para o leste"}'
+
+# Listar ambientes ativos
+curl "http://localhost:8080/api/v1/environments?active=true&page=1&page_size=20"   -H "Authorization: Bearer <access_token>"
+
+# Editar ambiente
+curl -X PUT http://localhost:8080/api/v1/environments/<id>   -H "Authorization: Bearer <access_token>"   -H "Content-Type: application/json"   -d '{"name":"Cozinha","notes":"Janela voltada para o leste","active":false}'
+
+# Excluir ambiente
+curl -X DELETE http://localhost:8080/api/v1/environments/<id>   -H "Authorization: Bearer <access_token>"
 ```
