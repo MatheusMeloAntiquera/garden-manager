@@ -114,7 +114,7 @@ func (h *Handler) me(w http.ResponseWriter, r *http.Request) {
 func writeServiceError(w http.ResponseWriter, err error) {
 	var validationErrs validator.ValidationErrors
 	if errors.As(err, &validationErrs) {
-		httpx.WriteError(w, http.StatusBadRequest, "dados inválidos", formatValidationErrors(validationErrs))
+		httpx.WriteError(w, http.StatusBadRequest, "dados inválidos", httpx.ValidationDetails(validationErrs))
 		return
 	}
 
@@ -134,12 +134,4 @@ func writeServiceError(w http.ResponseWriter, err error) {
 	default:
 		httpx.WriteError(w, http.StatusInternalServerError, "erro interno", nil)
 	}
-}
-
-func formatValidationErrors(errs validator.ValidationErrors) []string {
-	messages := make([]string, 0, len(errs))
-	for _, fieldErr := range errs {
-		messages = append(messages, fieldErr.Field()+": "+fieldErr.Tag())
-	}
-	return messages
 }

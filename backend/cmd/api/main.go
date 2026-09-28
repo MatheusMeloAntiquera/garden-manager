@@ -13,6 +13,7 @@ import (
 
 	"github.com/matheusantiquera/garden-manager/backend/config"
 	"github.com/matheusantiquera/garden-manager/backend/internal/auth"
+	"github.com/matheusantiquera/garden-manager/backend/internal/environment"
 	"github.com/matheusantiquera/garden-manager/backend/pkg/logger"
 	"github.com/matheusantiquera/garden-manager/backend/pkg/password"
 	"github.com/matheusantiquera/garden-manager/backend/pkg/postgres"
@@ -59,8 +60,13 @@ func run(log *slog.Logger) error {
 	}
 	authHandler := auth.NewHandler(authService)
 
+	environmentRepo := environment.NewRepository(pool)
+	environmentService := environment.NewService(environmentRepo, v)
+	environmentHandler := environment.NewHandler(environmentService)
+
 	mux := http.NewServeMux()
 	authHandler.RegisterRoutes(mux, tokens)
+	environmentHandler.RegisterRoutes(mux, tokens)
 
 	server := &http.Server{
 		Addr:              ":" + cfg.HTTPPort,
