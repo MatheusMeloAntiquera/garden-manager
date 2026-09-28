@@ -78,15 +78,22 @@ func (s *service) Signup(ctx context.Context, input SignupInput) (UserResponse, 
 
 	email := normalizeEmail(input.Email)
 
+	// O formato já foi garantido pela regra birthdate do validator.
+	birthDate, err := time.Parse(validator.DateLayout, input.BirthDate)
+	if err != nil {
+		return UserResponse{}, fmt.Errorf("convertendo data de nascimento: %w", err)
+	}
+
 	hash, err := s.hasher.Hash(input.Password)
 	if err != nil {
 		return UserResponse{}, fmt.Errorf("gerando hash da senha: %w", err)
 	}
 
 	user, err := s.repo.CreateUser(ctx, domain.User{
-		Name:     strings.TrimSpace(input.Name),
-		Email:    email,
-		Password: &hash,
+		Name:      strings.TrimSpace(input.Name),
+		Email:     email,
+		Password:  &hash,
+		BirthDate: &birthDate,
 	})
 	if err != nil {
 		return UserResponse{}, err

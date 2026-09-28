@@ -6,13 +6,15 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/matheusantiquera/garden-manager/backend/domain"
+	"github.com/matheusantiquera/garden-manager/backend/pkg/validator"
 )
 
 // SignupInput é o corpo esperado por POST /auth/signup.
 type SignupInput struct {
-	Name     string `json:"name" validate:"required,min=2,max=100"`
-	Email    string `json:"email" validate:"required,email,max=255"`
-	Password string `json:"password" validate:"required,strongpassword"`
+	Name      string `json:"name" validate:"required,min=2,max=100"`
+	Email     string `json:"email" validate:"required,email,max=255"`
+	Password  string `json:"password" validate:"required,strongpassword"`
+	BirthDate string `json:"birth_date" validate:"required,birthdate"` // AAAA-MM-DD
 }
 
 // LoginInput é o corpo esperado por POST /auth/login.
@@ -37,16 +39,24 @@ type UserResponse struct {
 	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
+	BirthDate *string   `json:"birth_date"` // AAAA-MM-DD; null para contas sem data cadastrada
 	Active    bool      `json:"active"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
 // NewUserResponse converte um domain.User em UserResponse.
 func NewUserResponse(u domain.User) UserResponse {
+	var birthDate *string
+	if u.BirthDate != nil {
+		formatted := u.BirthDate.Format(validator.DateLayout)
+		birthDate = &formatted
+	}
+
 	return UserResponse{
 		ID:        u.ID,
 		Name:      u.Name,
 		Email:     u.Email,
+		BirthDate: birthDate,
 		Active:    u.Active,
 		CreatedAt: u.CreatedAt,
 	}
