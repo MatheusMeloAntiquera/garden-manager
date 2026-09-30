@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-garden}
@@ -9,9 +9,14 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - garden_manager_postgres_data:/var/lib/postgresql/data
+      # A partir do Postgres 18 a imagem guarda os dados em
+      # /var/lib/postgresql/<versão>/docker; o volume é montado no diretório pai.
+      - garden_manager_postgres_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-garden} -d ${POSTGRES_DB:-garden_manager}"]
+      # -h 127.0.0.1 força a checagem via TCP: na primeira inicialização a
+      # imagem sobe um servidor temporário só no socket Unix (sem TCP), que
+      # faria o pg_isready passar antes de o servidor definitivo estar pronto.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U ${POSTGRES_USER:-garden} -d ${POSTGRES_DB:-garden_manager}"]
       interval: 5s
       timeout: 5s
       retries: 10
