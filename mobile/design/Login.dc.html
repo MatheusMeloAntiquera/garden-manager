@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Login</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2E5E45}a:hover{color:#1F4331}
+input::placeholder{color:#6B776E}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 72px 24px 32px; background: #F4F6F1; color: #18211B; font-family: 'Manrope', sans-serif; display: flex; flex-direction: column; justify-content: space-between">
+<div style="display: flex; flex-direction: column; gap: 40px">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="width: 64px; height: 64px; border-radius: 20px; background: #2E5E45; color: #FFFFFF; display: flex; align-items: center; justify-content: center">
+<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path></svg>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 style="margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -0.02em">Garden Manager</h1>
+<p style="margin: 0; font-size: 16px; line-height: 1.45; color: #4E5B52">Organize suas plantas por ambiente e nunca mais esqueça uma rega.</p>
+</div>
+</div>
+
+<form style="display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="email" style="font-size: 13px; font-weight: 700; color: #4E5B52">E-mail</label>
+<div style="display: flex; align-items: center; gap: 10px; height: 54px; box-sizing: border-box; padding: 0 16px; background: #FFFFFF; border: 1px solid #C3CCC2; border-radius: 14px; color: #4E5B52">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-10 6L2 7"></path></svg>
+<input id="email" type="email" placeholder="voce@email.com" style="flex-grow: 1; border: 0; outline: none; background: transparent; font-family: inherit; font-size: 16px; color: #18211B">
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="senha" style="font-size: 13px; font-weight: 700; color: #4E5B52">Senha</label>
+<div style="display: flex; align-items: center; gap: 10px; height: 54px; box-sizing: border-box; padding: 0 6px 0 16px; background: #FFFFFF; border: 2px solid #2E5E45; border-radius: 14px; color: #4E5B52">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+<input id="senha" type="password" placeholder="Sua senha" style="flex-grow: 1; border: 0; outline: none; background: transparent; font-family: inherit; font-size: 16px; color: #18211B">
+<button type="button" aria-label="Mostrar senha" style="width: 44px; height: 44px; border: 0; background: transparent; color: #4E5B52; display: flex; align-items: center; justify-content: center; border-radius: 12px; cursor: pointer">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+</button>
+</div>
+</div>
+<a href="Ambientes.dc.html" style="margin-top: 8px; height: 54px; border-radius: 27px; background: #2E5E45; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; text-decoration: none">Entrar</a>
+</form>
+</div>
+
+<div style="display: flex; justify-content: center; gap: 6px; font-size: 15px; color: #4E5B52">
+<span>Ainda não tem conta?</span>
+<a href="Cadastro.dc.html" style="font-weight: 800; text-decoration: none">Criar conta</a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
