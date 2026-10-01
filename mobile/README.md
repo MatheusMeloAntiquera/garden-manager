@@ -68,7 +68,7 @@ Você também pode passar `-PapiBaseUrl=...` ao `./gradlew assembleDebug`. Se o 
 
 Se o `JAVA_HOME` do seu sistema for anterior ao JDK 17, aponte-o para o JDK do Android Studio antes de rodar o `./gradlew`.
 
-No build de **debug**, a API é `http://localhost:8080/api/v1/` (HTTP sem TLS liberado só para localhost, 127.0.0.1 e 10.0.2.2). A URL do build de **release** está como placeholder em `app/build.gradle.kts` e precisa ser trocada quando a API for publicada.
+No build de **debug**, a API é `http://localhost:8080/api/v1/`, a menos que você configure outra URL (HTTP sem TLS é liberado só no debug). A URL do build de **release** está como placeholder em `app/build.gradle.kts` e precisa ser trocada quando a API for publicada.
 
 ## Testes
 
