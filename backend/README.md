@@ -10,17 +10,19 @@ O projeto segue o [Package Oriented Design](https://www.gobeyond.dev/packages-as
 backend/
 ├── cmd/api          # ponto de entrada da aplicação (main.go)
 ├── config           # carregamento de configuração via variáveis de ambiente
-├── domain           # tipos de domínio (User, RefreshToken, Environment)
+├── domain           # tipos de domínio (User, RefreshToken, Environment, Species, Plant)
 ├── internal/auth    # domínio de autenticação: dto, service, repository, handler
 ├── internal/environment # domínio de ambientes: dto, service, repository, handler
-├── pkg              # código reutilizável: postgres, password, token, validator, httpx, logger
+├── internal/species # catálogo de espécies (somente leitura): dto, service, repository, handler
+├── internal/plant   # domínio de plantas: dto, service, repository, handler
+├── pkg              # código reutilizável: postgres, password, token, validator, httpx, pagination, logger
 └── migrations       # migrations SQL do banco
 ```
 
 ## Requisitos
 
 - Go 1.22+
-- Docker e Docker Compose
+- Docker e Docker Compose (o Postgres 18 sobe pelo Compose; as migrations usam `uuidv7()`, que só existe a partir da versão 18)
 
 ## Rodando localmente
 
@@ -139,6 +141,69 @@ Resposta:
 { "data": [ { "id": "…", "name": "Cozinha", "notes": null, "active": true, "created_at": "…", "updated_at": "…" } ], "page": 1, "page_size": 20, "total": 1 }
 ```
 
+## Catálogo de espécies
+
+Catálogo compartilhado entre todos os usuários e **somente leitura** pela API, com 192 espécies comuns em casas, jardins e hortas no Brasil (folhagens, suculentas, flores, árvores, ervas, hortaliças, frutíferas e gramas). Ele é carregado pela migration `000006_seed_species`; os nomes científicos foram conferidos na API do [GBIF](https://www.gbif.org/) e o `gbif_key` (quando existe) guarda o táxon correspondente lá.
+
+Cada espécie tem um nome científico e vários nomes populares em português, um deles principal. Um mesmo nome popular pode valer para espécies diferentes (ex.: `caliandra-vermelha`).
+
+Todas as rotas exigem `Authorization: Bearer <access_token>`.
+
+| Método | Rota | Descrição |
+|---|---|---|
+| GET | `/api/v1/species` | Busca e lista espécies, ordenadas pelo nome popular principal |
+| GET | `/api/v1/species/{id}` | Retorna uma espécie |
+
+Parâmetros de query da listagem (todos opcionais):
+
+- `q`: busca por nome popular ou científico, sem diferenciar maiúsculas nem acentos (`ipe` acha `ipê-amarelo`);
+- `category`: `folhagem`, `suculenta`, `flor`, `arvore`, `erva`, `hortalica`, `frutifera` ou `grama`;
+- `page` e `page_size`: paginação, como em ambientes (padrão 1 e 20; máximo de 100 por página).
+
+Resposta de uma espécie:
+
+```json
+{ "id": "…", "scientific_name": "Ficus elastica", "family": "Moraceae", "category": "folhagem", "common_name": "falsa-seringueira", "common_names": ["falsa-seringueira", "figueira-da-borracha", "seringueira-de-jardim", "árvore-da-borracha"] }
+```
+
+## Plantas
+
+Uma planta é um exemplar que o usuário tem. Ela pode apontar para uma espécie do catálogo e para um ambiente, e pertence ao usuário que a criou: todas as rotas exigem `Authorization: Bearer <access_token>` e só enxergam as plantas do próprio usuário. Plantas de outro usuário respondem `404`.
+
+### Rotas
+
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | `/api/v1/plants` | Cria uma planta (`201`) |
+| GET | `/api/v1/plants` | Lista as plantas do usuário, ordenadas pelo nome de exibição |
+| GET | `/api/v1/plants/{id}` | Retorna uma planta |
+| PUT | `/api/v1/plants/{id}` | Substitui espécie, ambiente, apelido, observações e status |
+| DELETE | `/api/v1/plants/{id}` | Exclui a planta definitivamente (`204`) |
+
+### Campos
+
+| Campo | Regras |
+|---|---|
+| `species_id` | opcional; precisa existir no catálogo |
+| `environment_id` | opcional; precisa ser um ambiente do próprio usuário |
+| `nickname` | até 100 caracteres (espaços nas pontas são removidos); **obrigatório quando não há `species_id`** |
+| `notes` | opcional, até 2000 caracteres; em branco vira `null` |
+| `active` | opcional no POST (padrão `true`); obrigatório no PUT |
+
+Toda planta precisa de apelido ou de espécie. Como o PUT substitui o recurso inteiro, omitir `environment_id`, `species_id` ou `notes` nele os limpa.
+
+Um `species_id` ou `environment_id` inexistente (ou de outro usuário) responde `422 Unprocessable Entity`. Excluir um ambiente **não** apaga as plantas dele: elas ficam sem ambiente (`environment: null`).
+
+### Listagem
+
+Parâmetros de query (todos opcionais): `environment_id`, `species_id`, `active` (`true` ou `false`), `page` e `page_size`.
+
+A resposta traz o resumo da espécie e do ambiente, e `display_name`, que é o apelido ou, sem ele, o nome popular principal da espécie:
+
+```json
+{ "data": [ { "id": "…", "display_name": "Ficus da sala", "nickname": "Ficus da sala", "notes": null, "active": true, "species": { "id": "…", "scientific_name": "Ficus elastica", "common_name": "falsa-seringueira" }, "environment": { "id": "…", "name": "Sala" }, "created_at": "…", "updated_at": "…" } ], "page": 1, "page_size": 20, "total": 1 }
+```
+
 ## Exemplos (curl)
 
 ```bash
@@ -177,4 +242,22 @@ curl -X PUT http://localhost:8080/api/v1/environments/<id>   -H "Authorization: 
 
 # Excluir ambiente
 curl -X DELETE http://localhost:8080/api/v1/environments/<id>   -H "Authorization: Bearer <access_token>"
+
+# Buscar espécies no catálogo
+curl "http://localhost:8080/api/v1/species?q=esponjinha&category=flor"   -H "Authorization: Bearer <access_token>"
+
+# Criar planta (espécie do catálogo + ambiente)
+curl -X POST http://localhost:8080/api/v1/plants   -H "Authorization: Bearer <access_token>"   -H "Content-Type: application/json"   -d '{"species_id":"<species_id>","environment_id":"<environment_id>","nickname":"Ficus da sala"}'
+
+# Criar planta só com apelido
+curl -X POST http://localhost:8080/api/v1/plants   -H "Authorization: Bearer <access_token>"   -H "Content-Type: application/json"   -d '{"nickname":"Samambaia da vovó","notes":"Regar de manhã"}'
+
+# Listar plantas de um ambiente
+curl "http://localhost:8080/api/v1/plants?environment_id=<environment_id>&active=true"   -H "Authorization: Bearer <access_token>"
+
+# Editar planta
+curl -X PUT http://localhost:8080/api/v1/plants/<id>   -H "Authorization: Bearer <access_token>"   -H "Content-Type: application/json"   -d '{"species_id":"<species_id>","nickname":"Ficus da varanda","active":true}'
+
+# Excluir planta
+curl -X DELETE http://localhost:8080/api/v1/plants/<id>   -H "Authorization: Bearer <access_token>"
 ```

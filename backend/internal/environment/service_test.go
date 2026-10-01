@@ -13,6 +13,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/matheusantiquera/garden-manager/backend/domain"
+	"github.com/matheusantiquera/garden-manager/backend/pkg/pagination"
 	"github.com/matheusantiquera/garden-manager/backend/pkg/validator"
 )
 
@@ -222,8 +223,8 @@ func TestListOnlyReturnsOwnEnvironments(t *testing.T) {
 	if list.Data[0].Name != "Cozinha" || list.Data[1].Name != "Sala" {
 		t.Errorf("esperava ordenação por nome, obteve %q, %q", list.Data[0].Name, list.Data[1].Name)
 	}
-	if list.Page != 1 || list.PageSize != DefaultPageSize {
-		t.Errorf("esperava page=1 page_size=%d, obteve page=%d page_size=%d", DefaultPageSize, list.Page, list.PageSize)
+	if list.Page != 1 || list.PageSize != pagination.DefaultPageSize {
+		t.Errorf("esperava page=1 page_size=%d, obteve page=%d page_size=%d", pagination.DefaultPageSize, list.Page, list.PageSize)
 	}
 }
 
@@ -252,7 +253,7 @@ func TestListPagination(t *testing.T) {
 		createTestEnvironment(t, svc, userID, name, true)
 	}
 
-	list, err := svc.List(context.Background(), userID, ListInput{Page: 2, PageSize: 2})
+	list, err := svc.List(context.Background(), userID, ListInput{Params: pagination.Params{Page: 2, PageSize: 2}})
 	if err != nil {
 		t.Fatalf("List retornou erro: %v", err)
 	}

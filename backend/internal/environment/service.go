@@ -67,15 +67,9 @@ func (s *service) Get(ctx context.Context, userID, id uuid.UUID) (EnvironmentRes
 }
 
 func (s *service) List(ctx context.Context, userID uuid.UUID, input ListInput) (ListResponse, error) {
-	page := max(input.Page, 1)
+	params := input.Normalize()
 
-	pageSize := input.PageSize
-	if pageSize < 1 {
-		pageSize = DefaultPageSize
-	}
-	pageSize = min(pageSize, MaxPageSize)
-
-	envs, total, err := s.repo.List(ctx, userID, input.Active, pageSize, (page-1)*pageSize)
+	envs, total, err := s.repo.List(ctx, userID, input.Active, params.PageSize, params.Offset())
 	if err != nil {
 		return ListResponse{}, err
 	}
@@ -87,8 +81,8 @@ func (s *service) List(ctx context.Context, userID uuid.UUID, input ListInput) (
 
 	return ListResponse{
 		Data:     data,
-		Page:     page,
-		PageSize: pageSize,
+		Page:     params.Page,
+		PageSize: params.PageSize,
 		Total:    total,
 	}, nil
 }

@@ -6,12 +6,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/matheusantiquera/garden-manager/backend/domain"
-)
-
-// Limites de paginação da listagem de ambientes.
-const (
-	DefaultPageSize = 20
-	MaxPageSize     = 100
+	"github.com/matheusantiquera/garden-manager/backend/pkg/pagination"
 )
 
 // CreateInput é o corpo esperado por POST /environments.
@@ -32,9 +27,8 @@ type UpdateInput struct {
 
 // ListInput reúne os parâmetros de GET /environments.
 type ListInput struct {
-	Page     int   // começa em 1; valores menores viram 1
-	PageSize int   // valores fora de 1..MaxPageSize viram o padrão/limite
-	Active   *bool // nil lista ativos e inativos
+	pagination.Params
+	Active *bool // nil lista ativos e inativos
 }
 
 // EnvironmentResponse é a representação pública de um ambiente.
