@@ -23,10 +23,13 @@
         "refresh_token": "",
         "environment_id": "",
         "species_id": "",
-        "plant_id": ""
+        "plant_id": "",
+        "maintenance_type_id": "",
+        "maintenance_schedule_id": "",
+        "maintenance_log_id": ""
       },
       "dataPropertyOrder": {
-        "&": ["base_url", "access_token", "refresh_token", "environment_id", "species_id", "plant_id"]
+        "&": ["base_url", "access_token", "refresh_token", "environment_id", "species_id", "plant_id", "maintenance_type_id", "maintenance_schedule_id", "maintenance_log_id"]
       },
       "color": null,
       "isPrivate": false,
@@ -496,6 +499,382 @@
       "parameters": [],
       "authentication": {},
       "metaSortKey": 5,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "fld_maintenances",
+      "_type": "request_group",
+      "parentId": "wrk_garden_manager_auth",
+      "name": "Maintenances",
+      "description": "Tipos de manutenção (somente leitura), agendamentos (o planejado) e execuções (o realizado). Datas no formato AAAA-MM-DD HH:mm:ss. Use Create Plant para preencher plant_id e List Maintenance Types para preencher maintenance_type_id.",
+      "metaSortKey": 5
+    },
+    {
+      "_id": "req_maintenance_types_list",
+      "_type": "request",
+      "parentId": "fld_maintenances",
+      "name": "List Maintenance Types",
+      "description": "Lista os tipos de manutenção, ordenados por nome. O after-response script grava o primeiro id na variável maintenance_type_id.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/v1/maintenance-types",
+      "body": {},
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "afterResponseScript": "if (insomnia.response.code === 200) {\n  const body = insomnia.response.json();\n  if (body.data.length > 0) {\n    insomnia.environment.set('maintenance_type_id', body.data[0].id);\n    console.log('maintenance_type_id salvo no environment:', body.data[0].name);\n  }\n}",
+      "metaSortKey": 1,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_maintenance_schedules_create",
+      "_type": "request",
+      "parentId": "fld_maintenances",
+      "name": "Create Maintenance Schedule",
+      "description": "Agenda uma manutenção. plant_id, type_id e due_at são obrigatórios.\n\nO after-response script grava o id criado na variável maintenance_schedule_id.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/v1/maintenance-schedules",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"plant_id\": \"{{ _.plant_id }}\",\n  \"type_id\": \"{{ _.maintenance_type_id }}\",\n  \"due_at\": \"2026-10-05 08:00:00\",\n  \"notes\": \"Meio litro de água\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "afterResponseScript": "if (insomnia.response.code === 201) {\n  const body = insomnia.response.json();\n  insomnia.environment.set('maintenance_schedule_id', body.id);\n  console.log('maintenance_schedule_id salvo no environment.');\n} else {\n  console.log('Criação falhou. Status:', insomnia.response.code);\n}",
+      "metaSortKey": 2,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_maintenance_schedules_list",
+      "_type": "request",
+      "parentId": "fld_maintenances",
+      "name": "List Maintenance Schedules",
+      "description": "Lista os agendamentos do usuário, ordenados pelo prazo. Parâmetros opcionais: plant_id, type_id, status (pending, overdue), due_from, due_to, page e page_size.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/v1/maintenance-schedules",
+      "body": {},
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [
+        { "name": "page", "value": "1" },
+        { "name": "page_size", "value": "20" },
+        { "name": "plant_id", "value": "{{ _.plant_id }}", "disabled": true },
+        { "name": "type_id", "value": "{{ _.maintenance_type_id }}", "disabled": true },
+        { "name": "status", "value": "pending", "disabled": true },
+        { "name": "due_from", "value": "2026-10-01 00:00:00", "disabled": true },
+        { "name": "due_to", "value": "2026-10-31 23:59:59", "disabled": true }
+      ],
+      "authentication": {},
+      "metaSortKey": 3,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_maintenance_schedules_get",
+      "_type": "request",
+      "parentId": "fld_maintenances",
+      "name": "Get Maintenance Schedule",
+      "description": "Retorna um agendamento, com o status calculado.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/v1/maintenance-schedules/{{ _.maintenance_schedule_id }}",
+      "body": {},
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 4,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_maintenance_schedules_update",
+      "_type": "request",
+      "parentId": "fld_maintenances",
+      "name": "Update Maintenance Schedule",
+      "description": "Substitui planta, tipo, prazo e observações.",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/api/v1/maintenance-schedules/{{ _.maintenance_schedule_id }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"plant_id\": \"{{ _.plant_id }}\",\n  \"type_id\": \"{{ _.maintenance_type_id }}\",\n  \"due_at\": \"2026-10-06 08:00:00\",\n  \"notes\": \"Remarcado\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 5,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_maintenance_schedules_delete",
+      "_type": "request",
+      "parentId": "fld_maintenances",
+      "name": "Delete Maintenance Schedule",
+      "description": "Exclui (cancela) o agendamento (204).",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/api/v1/maintenance-schedules/{{ _.maintenance_schedule_id }}",
+      "body": {},
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 6,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_maintenance_logs_create_from_schedule",
+      "_type": "request",
+      "parentId": "fld_maintenances",
+      "name": "Create Maintenance Log (from schedule)",
+      "description": "Registra a execução de um agendamento, que é excluído. plant_id, type_id e notes omitidos são herdados dele; created_from_schedule volta true. Repetir com o mesmo agendamento responde 422, pois ele não existe mais.\n\nO after-response script grava o id criado na variável maintenance_log_id.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/v1/maintenance-logs",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"schedule_id\": \"{{ _.maintenance_schedule_id }}\",\n  \"performed_at\": \"2026-10-01 08:30:00\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "afterResponseScript": "if (insomnia.response.code === 201) {\n  const body = insomnia.response.json();\n  insomnia.environment.set('maintenance_log_id', body.id);\n  console.log('maintenance_log_id salvo no environment.');\n} else {\n  console.log('Criação falhou. Status:', insomnia.response.code);\n}",
+      "metaSortKey": 7,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_maintenance_logs_create",
+      "_type": "request",
+      "parentId": "fld_maintenances",
+      "name": "Create Maintenance Log",
+      "description": "Registra uma execução sem agendamento. performed_at não pode estar no futuro.\n\nO after-response script grava o id criado na variável maintenance_log_id.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/v1/maintenance-logs",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"plant_id\": \"{{ _.plant_id }}\",\n  \"type_id\": \"{{ _.maintenance_type_id }}\",\n  \"performed_at\": \"2026-10-01 18:00:00\",\n  \"notes\": \"Poda das folhas secas\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "afterResponseScript": "if (insomnia.response.code === 201) {\n  const body = insomnia.response.json();\n  insomnia.environment.set('maintenance_log_id', body.id);\n  console.log('maintenance_log_id salvo no environment.');\n} else {\n  console.log('Criação falhou. Status:', insomnia.response.code);\n}",
+      "metaSortKey": 8,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_maintenance_logs_list",
+      "_type": "request",
+      "parentId": "fld_maintenances",
+      "name": "List Maintenance Logs",
+      "description": "Lista as execuções do usuário, da mais recente para a mais antiga. Parâmetros opcionais: plant_id, type_id, performed_from, performed_to, page e page_size.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/v1/maintenance-logs",
+      "body": {},
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [
+        { "name": "page", "value": "1" },
+        { "name": "page_size", "value": "20" },
+        { "name": "plant_id", "value": "{{ _.plant_id }}", "disabled": true },
+        { "name": "type_id", "value": "{{ _.maintenance_type_id }}", "disabled": true },
+        { "name": "performed_from", "value": "2026-10-01 00:00:00", "disabled": true },
+        { "name": "performed_to", "value": "2026-10-31 23:59:59", "disabled": true }
+      ],
+      "authentication": {},
+      "metaSortKey": 9,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_maintenance_logs_get",
+      "_type": "request",
+      "parentId": "fld_maintenances",
+      "name": "Get Maintenance Log",
+      "description": "Retorna uma execução.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/v1/maintenance-logs/{{ _.maintenance_log_id }}",
+      "body": {},
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 10,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_maintenance_logs_update",
+      "_type": "request",
+      "parentId": "fld_maintenances",
+      "name": "Update Maintenance Log",
+      "description": "Substitui planta, tipo, data de execução e observações. Não aceita schedule_id; created_from_schedule é mantido.",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/api/v1/maintenance-logs/{{ _.maintenance_log_id }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"plant_id\": \"{{ _.plant_id }}\",\n  \"type_id\": \"{{ _.maintenance_type_id }}\",\n  \"performed_at\": \"2026-10-01 09:00:00\",\n  \"notes\": \"Atrasou um pouco\"\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 11,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_maintenance_logs_delete",
+      "_type": "request",
+      "parentId": "fld_maintenances",
+      "name": "Delete Maintenance Log",
+      "description": "Exclui a execução (204).",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/api/v1/maintenance-logs/{{ _.maintenance_log_id }}",
+      "body": {},
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 12,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_plants_maintenance_schedules",
+      "_type": "request",
+      "parentId": "fld_plants",
+      "name": "List Plant Maintenance Schedules",
+      "description": "Lista os agendamentos de manutenção da planta. Aceita os mesmos parâmetros de List Maintenance Schedules (exceto plant_id). 404 se a planta não existir.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/v1/plants/{{ _.plant_id }}/maintenance-schedules",
+      "body": {},
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [
+        { "name": "page", "value": "1" },
+        { "name": "page_size", "value": "20" },
+        { "name": "status", "value": "pending", "disabled": true }
+      ],
+      "authentication": {},
+      "metaSortKey": 6,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_plants_maintenance_logs",
+      "_type": "request",
+      "parentId": "fld_plants",
+      "name": "List Plant Maintenance Logs",
+      "description": "Lista as execuções de manutenção da planta. Aceita os mesmos parâmetros de List Maintenance Logs (exceto plant_id). 404 se a planta não existir.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/v1/plants/{{ _.plant_id }}/maintenance-logs",
+      "body": {},
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [
+        { "name": "page", "value": "1" },
+        { "name": "page_size", "value": "20" }
+      ],
+      "authentication": {},
+      "metaSortKey": 7,
       "isPrivate": false,
       "settingStoreCookies": true,
       "settingSendCookies": true,

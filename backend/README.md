@@ -10,12 +10,13 @@ O projeto segue o [Package Oriented Design](https://www.gobeyond.dev/packages-as
 backend/
 ├── cmd/api          # ponto de entrada da aplicação (main.go)
 ├── config           # carregamento de configuração via variáveis de ambiente
-├── domain           # tipos de domínio (User, RefreshToken, Environment, Species, Plant)
+├── domain           # tipos de domínio (User, RefreshToken, Environment, Species, Plant, Maintenance*)
 ├── internal/auth    # domínio de autenticação: dto, service, repository, handler
 ├── internal/environment # domínio de ambientes: dto, service, repository, handler
 ├── internal/species # catálogo de espécies (somente leitura): dto, service, repository, handler
 ├── internal/plant   # domínio de plantas: dto, service, repository, handler
-├── pkg              # código reutilizável: postgres, password, token, validator, httpx, pagination, logger
+├── internal/maintenance # domínio de manutenções (tipos, agendamentos e execuções): dto, service, repositories, handler
+├── pkg              # código reutilizável: postgres, password, token, validator, httpx, pagination, datetime, logger
 └── migrations       # migrations SQL do banco
 ```
 
@@ -178,7 +179,9 @@ Uma planta é um exemplar que o usuário tem. Ela pode apontar para uma espécie
 | GET | `/api/v1/plants` | Lista as plantas do usuário, ordenadas pelo nome de exibição |
 | GET | `/api/v1/plants/{id}` | Retorna uma planta |
 | PUT | `/api/v1/plants/{id}` | Substitui espécie, ambiente, apelido, observações e status |
-| DELETE | `/api/v1/plants/{id}` | Exclui a planta definitivamente (`204`) |
+| DELETE | `/api/v1/plants/{id}` | Exclui a planta definitivamente (`204`), junto com as manutenções dela |
+| GET | `/api/v1/plants/{id}/maintenance-schedules` | Lista os agendamentos de manutenção da planta (ver [Manutenções](#manutenções)) |
+| GET | `/api/v1/plants/{id}/maintenance-logs` | Lista as execuções de manutenção da planta (ver [Manutenções](#manutenções)) |
 
 ### Campos
 
@@ -203,6 +206,94 @@ A resposta traz o resumo da espécie e do ambiente, e `display_name`, que é o a
 ```json
 { "data": [ { "id": "…", "display_name": "Ficus da sala", "nickname": "Ficus da sala", "notes": null, "active": true, "species": { "id": "…", "scientific_name": "Ficus elastica", "common_name": "falsa-seringueira" }, "environment": { "id": "…", "name": "Sala" }, "created_at": "…", "updated_at": "…" } ], "page": 1, "page_size": 20, "total": 1 }
 ```
+
+## Manutenções
+
+As manutenções ficam em dois recursos separados:
+
+- **agendamentos** (`maintenance-schedules`): o que está planejado e ainda não foi feito, com um prazo;
+- **execuções** (`maintenance-logs`): o que foi de fato feito, com a data de execução, a partir de um agendamento ou sem planejamento.
+
+Ao registrar a execução de um agendamento (`schedule_id` no POST de execução), **o agendamento é excluído**. A execução guarda `created_from_schedule: true` para indicar que nasceu de um agendamento. Assim, a lista de agendamentos contém só o que ainda falta fazer.
+
+Separar o planejado do realizado permite registrar execuções não planejadas, remarcar ou cancelar agendamentos sem mexer no histórico e, no futuro, ter agendamentos recorrentes.
+
+Todas as rotas exigem `Authorization: Bearer <access_token>` e só enxergam os registros do próprio usuário; os de outro usuário respondem `404`. Excluir uma planta apaga as manutenções dela.
+
+### Formato das datas
+
+`due_at` e `performed_at` usam o formato **`AAAA-MM-DD HH:mm:ss`** (ex.: `"2026-10-05 08:30:00"`), na entrada e na saída, assim como os filtros de intervalo da listagem. Como o formato não tem fuso, a API interpreta e formata os valores no fuso `APP_TIMEZONE` (padrão `America/Sao_Paulo`). Uma data fora do formato responde `400`. `created_at` e `updated_at` continuam em RFC 3339, como no resto da API.
+
+### Tipos de manutenção
+
+Catálogo **somente leitura**, carregado pela migration `000009_seed_maintenance_types`: Adubação, Mudança de Ambiente, Outro, Poda, Rega e Replante.
+
+| Método | Rota | Descrição |
+|---|---|---|
+| GET | `/api/v1/maintenance-types` | Lista os tipos, ordenados por nome (sem paginação) |
+
+```json
+{ "data": [ { "id": "…", "name": "Adubação" }, { "id": "…", "name": "Mudança de Ambiente" } ] }
+```
+
+### Agendamentos
+
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | `/api/v1/maintenance-schedules` | Cria um agendamento (`201`) |
+| GET | `/api/v1/maintenance-schedules` | Lista os agendamentos do usuário, ordenados pelo prazo |
+| GET | `/api/v1/maintenance-schedules/{id}` | Retorna um agendamento |
+| PUT | `/api/v1/maintenance-schedules/{id}` | Substitui planta, tipo, prazo e observações |
+| DELETE | `/api/v1/maintenance-schedules/{id}` | Exclui (cancela) o agendamento (`204`) |
+
+| Campo | Regras |
+|---|---|
+| `plant_id` | obrigatório; precisa ser uma planta do próprio usuário |
+| `type_id` | obrigatório; precisa existir em `/maintenance-types` |
+| `due_at` | obrigatório; prazo para execução (`AAAA-MM-DD HH:mm:ss`) |
+| `notes` | opcional, até 2000 caracteres; em branco vira `null` |
+
+A resposta traz `status`, calculado na hora da consulta: `overdue` se o prazo já venceu, senão `pending`.
+
+Parâmetros de query da listagem (todos opcionais): `plant_id`, `type_id`, `status` (`pending` ou `overdue`), `due_from` e `due_to` (intervalo do prazo, inclusive), `page` e `page_size`.
+
+```json
+{ "data": [ { "id": "…", "plant": { "id": "…", "display_name": "Samambaia da vovó" }, "type": { "id": "…", "name": "Rega" }, "due_at": "2026-10-05 08:00:00", "notes": null, "status": "pending", "created_at": "…", "updated_at": "…" } ], "page": 1, "page_size": 20, "total": 1 }
+```
+
+### Execuções
+
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | `/api/v1/maintenance-logs` | Registra uma execução (`201`); com `schedule_id`, exclui o agendamento |
+| GET | `/api/v1/maintenance-logs` | Lista as execuções do usuário, da mais recente para a mais antiga |
+| GET | `/api/v1/maintenance-logs/{id}` | Retorna uma execução |
+| PUT | `/api/v1/maintenance-logs/{id}` | Substitui planta, tipo, data de execução e observações |
+| DELETE | `/api/v1/maintenance-logs/{id}` | Exclui a execução (`204`) |
+
+| Campo | Regras |
+|---|---|
+| `schedule_id` | opcional, só no POST; agendamento do próprio usuário que está sendo executado (é excluído) |
+| `plant_id` | obrigatório sem `schedule_id`; com ele, pode ser omitido (é herdado do agendamento) ou precisa ser igual ao dele |
+| `type_id` | mesma regra de `plant_id` |
+| `performed_at` | obrigatório; data da execução (`AAAA-MM-DD HH:mm:ss`), não pode estar no futuro |
+| `notes` | opcional, até 2000 caracteres; em branco vira `null`. Com `schedule_id` e sem `notes`, herda as observações do agendamento |
+
+A resposta traz `created_from_schedule` (**criado por agendamento**), definido pela API: `true` quando a execução foi criada com `schedule_id`. Ele só é definido na criação: o PUT não aceita `schedule_id` e mantém o valor.
+
+O registro da execução e a exclusão do agendamento acontecem numa única transação. Informar um agendamento que já foi executado (e, portanto, excluído) responde `422`.
+
+Erros específicos (`422`): planta, tipo ou agendamento inexistentes (ou de outro usuário), planta/tipo diferentes dos do agendamento, ou `performed_at` no futuro.
+
+Parâmetros de query da listagem (todos opcionais): `plant_id`, `type_id`, `performed_from` e `performed_to` (intervalo da execução, inclusive), `page` e `page_size`.
+
+```json
+{ "data": [ { "id": "…", "plant": { "id": "…", "display_name": "Samambaia da vovó" }, "type": { "id": "…", "name": "Rega" }, "created_from_schedule": true, "performed_at": "2026-10-05 08:30:00", "notes": null, "created_at": "…", "updated_at": "…" } ], "page": 1, "page_size": 20, "total": 1 }
+```
+
+### Manutenções de uma planta
+
+`GET /api/v1/plants/{id}/maintenance-schedules` e `GET /api/v1/plants/{id}/maintenance-logs` aceitam os mesmos parâmetros das listagens acima (o `plant_id` é o da rota) e respondem `404` se a planta não existir ou for de outro usuário.
 
 ## Exemplos (curl)
 
@@ -260,4 +351,38 @@ curl -X PUT http://localhost:8080/api/v1/plants/<id>   -H "Authorization: Bearer
 
 # Excluir planta
 curl -X DELETE http://localhost:8080/api/v1/plants/<id>   -H "Authorization: Bearer <access_token>"
+
+# Listar tipos de manutenção
+curl http://localhost:8080/api/v1/maintenance-types   -H "Authorization: Bearer <access_token>"
+
+# Agendar uma manutenção
+curl -X POST http://localhost:8080/api/v1/maintenance-schedules   -H "Authorization: Bearer <access_token>"   -H "Content-Type: application/json"   -d '{"plant_id":"<plant_id>","type_id":"<type_id>","due_at":"2026-10-05 08:00:00","notes":"Meio litro de água"}'
+
+# Listar agendamentos atrasados
+curl "http://localhost:8080/api/v1/maintenance-schedules?status=overdue"   -H "Authorization: Bearer <access_token>"
+
+# Editar agendamento
+curl -X PUT http://localhost:8080/api/v1/maintenance-schedules/<id>   -H "Authorization: Bearer <access_token>"   -H "Content-Type: application/json"   -d '{"plant_id":"<plant_id>","type_id":"<type_id>","due_at":"2026-10-06 08:00:00"}'
+
+# Excluir agendamento
+curl -X DELETE http://localhost:8080/api/v1/maintenance-schedules/<id>   -H "Authorization: Bearer <access_token>"
+
+# Executar um agendamento (planta e tipo herdados dele; o agendamento é excluído)
+curl -X POST http://localhost:8080/api/v1/maintenance-logs   -H "Authorization: Bearer <access_token>"   -H "Content-Type: application/json"   -d '{"schedule_id":"<schedule_id>","performed_at":"2026-10-05 08:30:00"}'
+
+# Registrar uma execução sem agendamento
+curl -X POST http://localhost:8080/api/v1/maintenance-logs   -H "Authorization: Bearer <access_token>"   -H "Content-Type: application/json"   -d '{"plant_id":"<plant_id>","type_id":"<type_id>","performed_at":"2026-10-01 18:00:00","notes":"Poda das folhas secas"}'
+
+# Listar execuções de outubro
+curl "http://localhost:8080/api/v1/maintenance-logs?performed_from=2026-10-01%2000:00:00&performed_to=2026-10-31%2023:59:59"   -H "Authorization: Bearer <access_token>"
+
+# Editar execução
+curl -X PUT http://localhost:8080/api/v1/maintenance-logs/<id>   -H "Authorization: Bearer <access_token>"   -H "Content-Type: application/json"   -d '{"plant_id":"<plant_id>","type_id":"<type_id>","performed_at":"2026-10-05 09:00:00","notes":"Atrasou um pouco"}'
+
+# Excluir execução
+curl -X DELETE http://localhost:8080/api/v1/maintenance-logs/<id>   -H "Authorization: Bearer <access_token>"
+
+# Manutenções de uma planta
+curl http://localhost:8080/api/v1/plants/<id>/maintenance-schedules   -H "Authorization: Bearer <access_token>"
+curl http://localhost:8080/api/v1/plants/<id>/maintenance-logs   -H "Authorization: Bearer <access_token>"
 ```
