@@ -25,6 +25,26 @@ e o `canvas.json` guarda a posição e o título de cada tela no canvas.
 
 Fonte: Manrope (Google Fonts). Base: Material 3 / Jetpack Compose.
 
+## Paleta escura
+
+Variante derivada da Musgo para o tema escuro do app (ainda não desenhada no canvas). Todos os pares de texto e fundo têm contraste mínimo de 4,5:1.
+
+| Token | Cor |
+|---|---|
+| Primária | `#8FD3A8` (texto sobre ela: `#0F2F1E`) |
+| Container primário | `#1F4331` (texto: `#CDE6D3`) |
+| Fundo | `#101611` |
+| Superfície | `#17201A` |
+| Superfície variante / container secundário | `#26332A` |
+| Texto | `#E1E7DF` |
+| Texto secundário | `#B4C0B5` |
+| Contorno | `#6B7A6F` |
+| Água | `#9CC4E8` / `#1E3A55` |
+| Pendente | `#F2C46E` / `#4A3300` |
+| Erro / atrasada | `#FFB4AB` / `#5C1A14` |
+
+Os valores de código ficam em `mobile/app/.../core/designsystem/Color.kt`.
+
 ## Sincronização
 
 O canvas e esta pasta devem andar juntos: ao alterar o canvas, copie os
