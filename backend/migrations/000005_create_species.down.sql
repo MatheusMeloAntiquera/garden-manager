@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS species_common_names;
+DROP TABLE IF EXISTS species;
+DROP EXTENSION IF EXISTS unaccent;

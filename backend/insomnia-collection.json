@@ -9,7 +9,7 @@
       "_type": "workspace",
       "parentId": null,
       "name": "Garden Manager",
-      "description": "Rotas da API do garden-manager: autenticação (signup, login, refresh, logout, users/me) e ambientes (CRUD).",
+      "description": "Rotas da API do garden-manager: autenticação (signup, login, refresh, logout, users/me) ambientes, catálogo de espécies e plantas.",
       "scope": "collection"
     },
     {
@@ -21,10 +21,12 @@
         "base_url": "http://localhost:8080",
         "access_token": "",
         "refresh_token": "",
-        "environment_id": ""
+        "environment_id": "",
+        "species_id": "",
+        "plant_id": ""
       },
       "dataPropertyOrder": {
-        "&": ["base_url", "access_token", "refresh_token", "environment_id"]
+        "&": ["base_url", "access_token", "refresh_token", "environment_id", "species_id", "plant_id"]
       },
       "color": null,
       "isPrivate": false,
@@ -289,6 +291,204 @@
       "description": "Exclui o ambiente definitivamente (204).",
       "method": "DELETE",
       "url": "{{ _.base_url }}/api/v1/environments/{{ _.environment_id }}",
+      "body": {},
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 5,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "fld_species",
+      "_type": "request_group",
+      "parentId": "wrk_garden_manager_auth",
+      "name": "Species",
+      "description": "Catálogo de espécies (somente leitura). Rode o Login antes para preencher o access_token.",
+      "metaSortKey": 3
+    },
+    {
+      "_id": "req_species_list",
+      "_type": "request",
+      "parentId": "fld_species",
+      "name": "List Species",
+      "description": "Busca espécies no catálogo. Parâmetros opcionais: q (nome popular ou científico, sem diferenciar acentos), category (folhagem, suculenta, flor, arvore, erva, hortalica, frutifera, grama), page e page_size (1 a 100).\n\nO after-response script grava o id da primeira espécie retornada na variável species_id.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/v1/species",
+      "body": {},
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [
+        { "name": "q", "value": "seringueira" },
+        { "name": "category", "value": "folhagem", "disabled": true },
+        { "name": "page", "value": "1" },
+        { "name": "page_size", "value": "20" }
+      ],
+      "authentication": {},
+      "afterResponseScript": "if (insomnia.response.code === 200) {\n  const body = insomnia.response.json();\n  if (body.data.length > 0) {\n    insomnia.environment.set('species_id', body.data[0].id);\n    console.log('species_id salvo no environment: ' + body.data[0].scientific_name);\n  }\n} else {\n  console.log('Busca falhou. Status:', insomnia.response.code);\n}",
+      "metaSortKey": 1,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_species_get",
+      "_type": "request",
+      "parentId": "fld_species",
+      "name": "Get Species",
+      "description": "Retorna a espécie salva em species_id.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/v1/species/{{ _.species_id }}",
+      "body": {},
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 2,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "fld_plants",
+      "_type": "request_group",
+      "parentId": "wrk_garden_manager_auth",
+      "name": "Plants",
+      "description": "CRUD de plantas do usuário autenticado. Use List Species para preencher species_id e Create Environment para preencher environment_id.",
+      "metaSortKey": 4
+    },
+    {
+      "_id": "req_plants_create",
+      "_type": "request",
+      "parentId": "fld_plants",
+      "name": "Create Plant",
+      "description": "Cria uma planta. Toda planta precisa de nickname ou species_id; species_id e environment_id são opcionais. active é opcional (padrão true).\n\nO after-response script grava o id criado na variável plant_id.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/api/v1/plants",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"species_id\": \"{{ _.species_id }}\",\n  \"environment_id\": \"{{ _.environment_id }}\",\n  \"nickname\": \"Ficus da sala\",\n  \"notes\": \"Perto da janela\",\n  \"active\": true\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "afterResponseScript": "if (insomnia.response.code === 201) {\n  const body = insomnia.response.json();\n  insomnia.environment.set('plant_id', body.id);\n  console.log('plant_id salvo no environment.');\n} else {\n  console.log('Criação falhou. Status:', insomnia.response.code);\n}",
+      "metaSortKey": 1,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_plants_list",
+      "_type": "request",
+      "parentId": "fld_plants",
+      "name": "List Plants",
+      "description": "Lista as plantas do usuário, ordenadas pelo nome de exibição. Parâmetros opcionais: environment_id, species_id, active (true/false), page e page_size (1 a 100).",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/v1/plants",
+      "body": {},
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [
+        { "name": "page", "value": "1" },
+        { "name": "page_size", "value": "20" },
+        { "name": "environment_id", "value": "{{ _.environment_id }}", "disabled": true },
+        { "name": "species_id", "value": "{{ _.species_id }}", "disabled": true },
+        { "name": "active", "value": "true", "disabled": true }
+      ],
+      "authentication": {},
+      "metaSortKey": 2,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_plants_get",
+      "_type": "request",
+      "parentId": "fld_plants",
+      "name": "Get Plant",
+      "description": "Retorna a planta salva em plant_id.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/api/v1/plants/{{ _.plant_id }}",
+      "body": {},
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 3,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_plants_update",
+      "_type": "request",
+      "parentId": "fld_plants",
+      "name": "Update Plant",
+      "description": "Substitui espécie, ambiente, apelido, observações e status. active é obrigatório; campos opcionais omitidos são limpos.",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/api/v1/plants/{{ _.plant_id }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"species_id\": \"{{ _.species_id }}\",\n  \"environment_id\": \"{{ _.environment_id }}\",\n  \"nickname\": \"Ficus da varanda\",\n  \"notes\": \"Mudou de lugar\",\n  \"active\": true\n}"
+      },
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parameters": [],
+      "authentication": {},
+      "metaSortKey": 4,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_plants_delete",
+      "_type": "request",
+      "parentId": "fld_plants",
+      "name": "Delete Plant",
+      "description": "Exclui a planta definitivamente (204).",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/api/v1/plants/{{ _.plant_id }}",
       "body": {},
       "headers": [
         { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
