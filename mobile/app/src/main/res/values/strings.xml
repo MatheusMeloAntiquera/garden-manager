@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Garden Manager</string>
+
+    <!-- Comum -->
+    <string name="action_back">Voltar</string>
+    <string name="action_retry">Tentar de novo</string>
+    <string name="coming_soon">Em breve</string>
+    <string name="coming_soon_description">Esta área ainda está sendo construída.</string>
+
+    <!-- Erros -->
+    <string name="error_network">Não foi possível conectar ao servidor. Verifique sua conexão e tente de novo.</string>
+    <string name="error_unknown">Algo deu errado. Tente de novo em instantes.</string>
+    <string name="notice_session_expired">Sua sessão expirou. Entre de novo para continuar.</string>
+    <string name="notice_account_created">Conta criada! Entre com seu e-mail e senha.</string>
+
+    <!-- Navegação -->
+    <string name="nav_environments">Ambientes</string>
+    <string name="nav_plants">Plantas</string>
+    <string name="nav_schedule">Agenda</string>
+    <string name="nav_profile">Perfil</string>
+
+    <!-- Login -->
+    <string name="login_tagline">Organize suas plantas por ambiente e nunca mais esqueça uma rega.</string>
+    <string name="field_email">E-mail</string>
+    <string name="field_email_placeholder">voce@email.com</string>
+    <string name="field_password">Senha</string>
+    <string name="field_password_placeholder_login">Sua senha</string>
+    <string name="field_password_placeholder_signup">Crie uma senha forte</string>
+    <string name="action_show_password">Mostrar senha</string>
+    <string name="action_hide_password">Ocultar senha</string>
+    <string name="login_submit">Entrar</string>
+    <string name="login_no_account">Ainda não tem conta?</string>
+    <string name="login_create_account">Criar conta</string>
+    <string name="validation_email_required">Informe seu e-mail.</string>
+    <string name="validation_email_invalid">Informe um e-mail válido.</string>
+    <string name="validation_password_required">Informe sua senha.</string>
+
+    <!-- Cadastro -->
+    <string name="signup_title">Criar conta</string>
+    <string name="signup_subtitle">Leva menos de um minuto.</string>
+    <string name="field_name">Nome</string>
+    <string name="field_name_placeholder">Como devemos te chamar</string>
+    <string name="field_birth_date">Data de nascimento</string>
+    <string name="field_birth_date_placeholder">dd/mm/aaaa</string>
+    <string name="signup_submit">Criar conta</string>
+    <string name="signup_has_account">Já tem conta?</string>
+    <string name="signup_login">Entrar</string>
+    <string name="password_rule_length">Pelo menos 8 caracteres</string>
+    <string name="password_rule_digit">Um número</string>
+    <string name="password_rule_special">Um caractere especial (como ! ou @)</string>
+    <string name="validation_name_invalid">Informe seu nome, com 2 a 100 caracteres.</string>
+    <string name="validation_birth_date_invalid">Informe uma data válida, como 14/03/1994.</string>
+    <string name="validation_birth_date_range">A data precisa estar entre 01/01/1900 e hoje.</string>
+    <string name="validation_password_weak">A senha não cumpre todas as regras abaixo.</string>
+    <string name="validation_password_too_long">A senha pode ter no máximo 128 caracteres.</string>
+    <string name="error_email_taken">Este e-mail já está cadastrado.</string>
+    <string name="error_signup_invalid">Confira os campos e tente de novo.</string>
+
+    <!-- Perfil -->
+    <string name="profile_title">Perfil</string>
+    <string name="profile_birth_date">Nascimento: %1$s</string>
+    <string name="profile_settings">Configurações</string>
+    <string name="profile_theme">Tema</string>
+    <string name="profile_theme_dialog_title">Escolha o tema</string>
+    <string name="theme_system">Do sistema</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Escuro</string>
+    <string name="profile_about">Sobre o app</string>
+    <string name="profile_logout">Sair da conta</string>
+    <string name="profile_load_error">Não foi possível carregar seus dados.</string>
+    <string name="action_cancel">Cancelar</string>
+</resources>
