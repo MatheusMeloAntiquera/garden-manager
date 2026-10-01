@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -5,6 +7,13 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
 }
+
+// URL da API no build de debug: -PapiBaseUrl=..., ou apiBaseUrl no local.properties (que não vai para o git).
+// O padrão é o localhost do celular, que só funciona com `adb reverse tcp:8080 tcp:8080`.
+val debugApiBaseUrl: String = (findProperty("apiBaseUrl") as String?)
+    ?: rootProject.file("local.properties").takeIf { it.exists() }
+        ?.inputStream()?.use { Properties().apply { load(it) } }?.getProperty("apiBaseUrl")
+    ?: "http://localhost:8080/api/v1/"
 
 android {
     namespace = "com.matheusantiquera.gardenmanager"
@@ -22,8 +31,7 @@ android {
 
     buildTypes {
         debug {
-            // A API local é acessada pelo celular via `adb reverse tcp:8080 tcp:8080`.
-            buildConfigField("String", "API_BASE_URL", "\"http://localhost:8080/api/v1/\"")
+            buildConfigField("String", "API_BASE_URL", "\"$debugApiBaseUrl\"")
         }
         release {
             // TODO: apontar para a URL real da API quando ela estiver publicada.

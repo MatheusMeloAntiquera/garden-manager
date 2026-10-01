@@ -56,6 +56,16 @@ app/src/main/java/com/matheusantiquera/gardenmanager/
    ./gradlew assembleDebug
    ```
 
+### Sem USB (APK copiado para o celular)
+
+O celular e o computador precisam estar na mesma rede Wi-Fi. Aponte o build de debug para o IP do computador, em `mobile/local.properties` (arquivo fora do git), e gere o APK:
+
+```properties
+apiBaseUrl=http://192.168.0.11:8080/api/v1/
+```
+
+Você também pode passar `-PapiBaseUrl=...` ao `./gradlew assembleDebug`. Se o computador mudar de IP, gere o APK de novo. No Windows, libere a porta 8080 no firewall para a rede privada.
+
 Se o `JAVA_HOME` do seu sistema for anterior ao JDK 17, aponte-o para o JDK do Android Studio antes de rodar o `./gradlew`.
 
 No build de **debug**, a API é `http://localhost:8080/api/v1/` (HTTP sem TLS liberado só para localhost, 127.0.0.1 e 10.0.2.2). A URL do build de **release** está como placeholder em `app/build.gradle.kts` e precisa ser trocada quando a API for publicada.
