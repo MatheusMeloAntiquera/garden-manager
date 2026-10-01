@@ -1,0 +1,51 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Agenda.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Agenda de manutenções", "w": 390, "x": 940, "y": 2444 },
+    "Ambientes.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Ambientes", "w": 390, "x": 940, "y": 1180 },
+    "Cadastro.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Cadastro", "w": 390, "x": 470, "y": 1180 },
+    "DetalhePlanta.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Detalhe da planta", "w": 390, "x": 0, "y": 2444 },
+    "FormPlanta.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Editar planta", "w": 390, "x": 470, "y": 2444 },
+    "Login.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Login", "w": 390, "x": 0, "y": 1180 },
+    "Main.dc.html": { "h": 760, "title": "Paleta Musgo e tipografia", "w": 1200, "x": 0, "y": 0 },
+    "Perfil.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Perfil e configurações", "w": 390, "x": 1410, "y": 2444 },
+    "Plantas.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Plantas", "w": 390, "x": 1410, "y": 1180 },
+    "FormAmbiente.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Editar ambiente", "w": 390, "x": 0, "y": 3708 },
+    "ConfirmarExcluirAmbiente.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Confirmar: excluir ambiente", "w": 390, "x": 470, "y": 3708 },
+    "ConfirmarExcluirPlanta.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Confirmar: excluir planta", "w": 390, "x": 940, "y": 3708 },
+    "AcoesAgendamento.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Ações do agendamento", "w": 390, "x": 1410, "y": 3708 },
+    "ConfirmarExcluirAgendamento.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Confirmar: excluir agendamento", "w": 390, "x": 1880, "y": 3708 },
+    "AcoesRegistro.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Ações do registro", "w": 390, "x": 2350, "y": 3708 },
+    "ConfirmarExcluirRegistro.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Confirmar: excluir registro", "w": 390, "x": 2820, "y": 3708 }
+  },
+  "createdOnFiles": { "at": "2026-10-01T12:00:00Z", "v": 1 },
+  "designSystems": [],
+  "launch": { "view": "canvas" },
+  "notes": {
+    "linhaA": { "kind": "title1", "maxW": 1800, "text": "Acesso, ambientes e plantas", "w": 240, "x": 0, "y": 880 },
+    "linhaB": { "kind": "title1", "maxW": 1800, "text": "Planta, agenda e perfil", "w": 240, "x": 0, "y": 2144 },
+    "linhaC": { "kind": "title1", "maxW": 3210, "text": "Edição e exclusões", "x": 0, "y": 3408 },
+    "paleta": { "kind": "title1", "maxW": 1200, "text": "Paleta e tipografia", "w": 240, "x": 0, "y": -300 }
+  },
+  "order": [
+    "Main.dc.html",
+    "Login.dc.html",
+    "Cadastro.dc.html",
+    "Ambientes.dc.html",
+    "Plantas.dc.html",
+    "DetalhePlanta.dc.html",
+    "FormPlanta.dc.html",
+    "Agenda.dc.html",
+    "Perfil.dc.html",
+    "FormAmbiente.dc.html",
+    "ConfirmarExcluirAmbiente.dc.html",
+    "ConfirmarExcluirPlanta.dc.html",
+    "AcoesAgendamento.dc.html",
+    "ConfirmarExcluirAgendamento.dc.html",
+    "AcoesRegistro.dc.html",
+    "ConfirmarExcluirRegistro.dc.html"
+  ],
+  "pages": [],
+  "title": "Garden Manager — Telas do App"
+}

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Editar planta</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2E5E45}a:hover{color:#1F4331}
+input::placeholder, textarea::placeholder{color:#6B776E}
+.filled::placeholder{color:#18211B; opacity: 1}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F6F1; color: #18211B; font-family: 'Manrope', sans-serif; display: flex; flex-direction: column; overflow: hidden">
+<header style="display: flex; align-items: center; gap: 4px; padding: 16px 8px 8px">
+<a href="DetalhePlanta.dc.html" aria-label="Fechar" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #18211B">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+</a>
+<h1 style="margin: 0; font-size: 20px; font-weight: 800">Editar planta</h1>
+</header>
+
+<form style="flex-grow: 1; padding: 8px 20px 24px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="apelido" style="font-size: 13px; font-weight: 700; color: #4E5B52">Apelido</label>
+<input id="apelido" class="filled" type="text" placeholder="Monstrinha" style="height: 54px; box-sizing: border-box; padding: 0 16px; background: #FFFFFF; border: 2px solid #2E5E45; border-radius: 14px; font-family: inherit; font-size: 16px; color: #18211B; outline: none">
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="especie" style="font-size: 13px; font-weight: 700; color: #4E5B52">Espécie</label>
+<div style="display: flex; align-items: center; gap: 10px; min-height: 62px; box-sizing: border-box; padding: 8px 12px 8px 16px; background: #FFFFFF; border: 1px solid #C3CCC2; border-radius: 14px">
+<div style="flex-grow: 1; display: flex; flex-direction: column; gap: 1px">
+<input id="especie" class="filled" type="text" placeholder="Costela-de-adão" style="border: 0; outline: none; padding: 0; background: transparent; font-family: inherit; font-size: 16px; color: #18211B">
+<div style="font-size: 13px; color: #4E5B52"><i>Monstera deliciosa</i></div>
+</div>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4E5B52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="ambiente" style="font-size: 13px; font-weight: 700; color: #4E5B52">Ambiente</label>
+<div style="display: flex; align-items: center; height: 54px; box-sizing: border-box; padding: 0 12px 0 16px; background: #FFFFFF; border: 1px solid #C3CCC2; border-radius: 14px">
+<input id="ambiente" class="filled" type="text" placeholder="Sala de estar" style="flex-grow: 1; border: 0; outline: none; background: transparent; font-family: inherit; font-size: 16px; color: #18211B">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4E5B52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="obs" style="font-size: 13px; font-weight: 700; color: #4E5B52">Observações</label>
+<textarea id="obs" class="filled" rows="3" placeholder="Perto da janela, luz indireta. Gosta de borrifar as folhas no verão." style="box-sizing: border-box; padding: 14px 16px; background: #FFFFFF; border: 1px solid #C3CCC2; border-radius: 14px; font-family: inherit; font-size: 16px; line-height: 1.45; color: #18211B; outline: none; resize: none"></textarea>
+</div>
+
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 2px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 15px; font-weight: 700">Planta ativa</div>
+<div style="font-size: 13px; color: #4E5B52">Desative para arquivar sem perder o histórico</div>
+</div>
+<button type="button" role="switch" aria-checked="true" aria-label="Planta ativa" style="width: 52px; height: 32px; border-radius: 16px; border: 0; background: #2E5E45; padding: 4px; display: flex; justify-content: flex-end; align-items: center; flex-shrink: 0; cursor: pointer"><span style="width: 24px; height: 24px; border-radius: 12px; background: #FFFFFF"></span></button>
+</div>
+
+<div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4E5B52; padding: 0 2px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>
+Informe um apelido ou uma espécie.
+</div>
+
+<div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px">
+<a href="DetalhePlanta.dc.html" style="height: 54px; border-radius: 27px; background: #2E5E45; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; text-decoration: none">Salvar</a>
+<a href="ConfirmarExcluirPlanta.dc.html" style="height: 48px; border-radius: 24px; color: #A1281F; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 700; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>Excluir planta</a>
+</div>
+</form>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

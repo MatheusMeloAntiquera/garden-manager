@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Cadastro</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2E5E45}a:hover{color:#1F4331}
+input::placeholder{color:#6B776E}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F6F1; color: #18211B; font-family: 'Manrope', sans-serif; display: flex; flex-direction: column">
+<header style="display: flex; align-items: center; gap: 4px; padding: 16px 8px 8px">
+<a href="Login.dc.html" aria-label="Voltar" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #18211B">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
+</a>
+</header>
+<div style="flex-grow: 1; padding: 0 24px 32px; display: flex; flex-direction: column; justify-content: space-between">
+<div style="display: flex; flex-direction: column; gap: 28px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 style="margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.01em">Criar conta</h1>
+<p style="margin: 0; font-size: 15px; color: #4E5B52">Leva menos de um minuto.</p>
+</div>
+<form style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="nome" style="font-size: 13px; font-weight: 700; color: #4E5B52">Nome</label>
+<input id="nome" type="text" placeholder="Como devemos te chamar" style="height: 54px; box-sizing: border-box; padding: 0 16px; background: #FFFFFF; border: 1px solid #C3CCC2; border-radius: 14px; font-family: inherit; font-size: 16px; color: #18211B; outline: none">
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="email" style="font-size: 13px; font-weight: 700; color: #4E5B52">E-mail</label>
+<input id="email" type="email" placeholder="voce@email.com" style="height: 54px; box-sizing: border-box; padding: 0 16px; background: #FFFFFF; border: 1px solid #C3CCC2; border-radius: 14px; font-family: inherit; font-size: 16px; color: #18211B; outline: none">
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="nascimento" style="font-size: 13px; font-weight: 700; color: #4E5B52">Data de nascimento</label>
+<div style="display: flex; align-items: center; height: 54px; box-sizing: border-box; padding: 0 16px; background: #FFFFFF; border: 1px solid #C3CCC2; border-radius: 14px; color: #4E5B52; gap: 10px">
+<input id="nascimento" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" style="flex-grow: 1; border: 0; outline: none; background: transparent; font-family: inherit; font-size: 16px; color: #18211B">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="senha" style="font-size: 13px; font-weight: 700; color: #4E5B52">Senha</label>
+<input id="senha" type="password" placeholder="Crie uma senha forte" style="height: 54px; box-sizing: border-box; padding: 0 16px; background: #FFFFFF; border: 1px solid #C3CCC2; border-radius: 14px; font-family: inherit; font-size: 16px; color: #18211B; outline: none">
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 6px 4px 0; font-size: 13px; color: #4E5B52">
+<div style="display: flex; align-items: center; gap: 6px; color: #2E5E45; font-weight: 600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Pelo menos 8 caracteres</div>
+<div style="display: flex; align-items: center; gap: 6px; color: #2E5E45; font-weight: 600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Letras maiúsculas e minúsculas</div>
+<div style="display: flex; align-items: center; gap: 6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle></svg>Um número e um símbolo</div>
+</div>
+</div>
+</form>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px">
+<a href="Ambientes.dc.html" style="height: 54px; border-radius: 27px; background: #2E5E45; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; text-decoration: none">Criar conta</a>
+<div style="display: flex; justify-content: center; gap: 6px; font-size: 15px; color: #4E5B52">
+<span>Já tem conta?</span>
+<a href="Login.dc.html" style="font-weight: 800; text-decoration: none">Entrar</a>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
