@@ -94,7 +94,36 @@ func (f *fakeRepository) FindByID(_ context.Context, userID, id uuid.UUID) (doma
 	return f.hydrate(p), nil
 }
 
-func (f *fakeRepository) List(_ context.Context, userID uuid.UUID, environmentID, speciesID *uuid.UUID, active *bool, limit, offset int) ([]domain.Plant, int, error) {
+// matchesQuery imita a busca do repositório real de forma simplificada: texto
+// contido (sem diferenciar maiúsculas) no apelido, no nome científico ou nos
+// nomes populares. Não ignora acentos; isso só dá para validar no Postgres.
+func (f *fakeRepository) matchesQuery(p domain.Plant, query string) bool {
+	if query == "" {
+		return true
+	}
+
+	query = strings.ToLower(query)
+	contains := func(s string) bool { return strings.Contains(strings.ToLower(s), query) }
+
+	if p.Nickname != nil && contains(*p.Nickname) {
+		return true
+	}
+	if p.SpeciesID != nil {
+		s := f.species.byID[*p.SpeciesID]
+		if contains(s.ScientificName) {
+			return true
+		}
+		for _, n := range s.CommonNames {
+			if contains(n.Name) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func (f *fakeRepository) List(_ context.Context, userID uuid.UUID, environmentID, speciesID *uuid.UUID, active *bool, query string, limit, offset int) ([]domain.Plant, int, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
@@ -105,6 +134,7 @@ func (f *fakeRepository) List(_ context.Context, userID uuid.UUID, environmentID
 		case environmentID != nil && (p.EnvironmentID == nil || *p.EnvironmentID != *environmentID):
 		case speciesID != nil && (p.SpeciesID == nil || *p.SpeciesID != *speciesID):
 		case active != nil && p.Active != *active:
+		case !f.matchesQuery(p, query):
 		default:
 			matched = append(matched, f.hydrate(p))
 		}
@@ -353,6 +383,12 @@ func TestListFiltersAndOwnership(t *testing.T) {
 		{"por espécie", ListInput{SpeciesID: &ficus}, []string{"falsa-seringueira"}},
 		{"só inativas", ListInput{Active: ptr(false)}, []string{"falsa-seringueira"}},
 		{"ativas na sala", ListInput{EnvironmentID: &sala, Active: ptr(true)}, []string{"Bromélia"}},
+		{"busca pelo apelido", ListInput{Query: "alec"}, []string{"Alecrim"}},
+		{"busca pelo nome científico", ListInput{Query: "ficus"}, []string{"falsa-seringueira"}},
+		{"busca pelo nome popular", ListInput{Query: "seringueira"}, []string{"falsa-seringueira"}},
+		{"busca ignora espaços nas pontas", ListInput{Query: "  alec  "}, []string{"Alecrim"}},
+		{"busca combinada com ambiente", ListInput{Query: "alec", EnvironmentID: &sala}, nil},
+		{"busca sem resultado", ListInput{Query: "orquídea"}, nil},
 	}
 
 	for _, tt := range tests {

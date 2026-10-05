@@ -148,7 +148,7 @@ func userAndPlantID(w http.ResponseWriter, r *http.Request) (userID, id uuid.UUI
 	return userID, id, true
 }
 
-// parseListInput lê page, page_size, environment_id, species_id e active da
+// parseListInput lê page, page_size, environment_id, species_id, active e q da
 // query string. Parâmetros ausentes ficam nulos ou com o valor zero e são
 // normalizados pelo service.
 func parseListInput(r *http.Request) (ListInput, error) {
@@ -156,8 +156,8 @@ func parseListInput(r *http.Request) (ListInput, error) {
 	if err != nil {
 		return ListInput{}, err
 	}
-	input := ListInput{Params: params}
 	query := r.URL.Query()
+	input := ListInput{Params: params, Query: query.Get("q")}
 
 	if raw := query.Get("environment_id"); raw != "" {
 		id, err := uuid.Parse(raw)

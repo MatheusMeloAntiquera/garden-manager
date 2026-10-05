@@ -2,6 +2,7 @@ package environment
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"slices"
 	"strings"
@@ -18,14 +19,23 @@ import (
 )
 
 // fakeRepository é uma implementação em memória de Repository, usada para
-// testar o service sem depender de um Postgres real.
+// testar o service sem depender de um Postgres real. plantCounts faz o papel
+// da contagem de plantas ativas que o Postgres calcula na consulta.
 type fakeRepository struct {
-	mu   sync.Mutex
-	byID map[uuid.UUID]domain.Environment
+	mu          sync.Mutex
+	byID        map[uuid.UUID]domain.Environment
+	plantCounts map[uuid.UUID]int
 }
 
 func newFakeRepository() *fakeRepository {
-	return &fakeRepository{byID: make(map[uuid.UUID]domain.Environment)}
+	return &fakeRepository{
+		byID:        make(map[uuid.UUID]domain.Environment),
+		plantCounts: make(map[uuid.UUID]int),
+	}
+}
+
+func (f *fakeRepository) view(env domain.Environment) EnvironmentView {
+	return EnvironmentView{Environment: env, PlantCount: f.plantCounts[env.ID]}
 }
 
 func (f *fakeRepository) Create(_ context.Context, env domain.Environment) (domain.Environment, error) {
@@ -52,11 +62,22 @@ func (f *fakeRepository) FindByID(_ context.Context, userID, id uuid.UUID) (doma
 	return env, nil
 }
 
-func (f *fakeRepository) List(_ context.Context, userID uuid.UUID, active *bool, limit, offset int) ([]domain.Environment, int, error) {
+func (f *fakeRepository) FindViewByID(ctx context.Context, userID, id uuid.UUID) (EnvironmentView, error) {
+	env, err := f.FindByID(ctx, userID, id)
+	if err != nil {
+		return EnvironmentView{}, err
+	}
+
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.view(env), nil
+}
+
+func (f *fakeRepository) List(_ context.Context, userID uuid.UUID, active *bool, limit, offset int) ([]EnvironmentView, int, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
-	var matched []domain.Environment
+	var matched []EnvironmentView
 	for _, env := range f.byID {
 		if env.UserID != userID {
 			continue
@@ -64,10 +85,10 @@ func (f *fakeRepository) List(_ context.Context, userID uuid.UUID, active *bool,
 		if active != nil && env.Active != *active {
 			continue
 		}
-		matched = append(matched, env)
+		matched = append(matched, f.view(env))
 	}
 
-	slices.SortFunc(matched, func(a, b domain.Environment) int {
+	slices.SortFunc(matched, func(a, b EnvironmentView) int {
 		return strings.Compare(a.Name, b.Name)
 	})
 
@@ -112,12 +133,22 @@ func (f *fakeRepository) Delete(_ context.Context, userID, id uuid.UUID) error {
 func newTestService(t *testing.T) Service {
 	t.Helper()
 
+	svc, _ := newTestServiceWithRepo(t)
+	return svc
+}
+
+// newTestServiceWithRepo devolve também o fake, para os testes que precisam
+// preparar dados que só o banco calcularia, como a contagem de plantas.
+func newTestServiceWithRepo(t *testing.T) (Service, *fakeRepository) {
+	t.Helper()
+
 	v, err := validator.New()
 	if err != nil {
 		t.Fatalf("validator.New retornou erro: %v", err)
 	}
 
-	return NewService(newFakeRepository(), v)
+	repo := newFakeRepository()
+	return NewService(repo, v), repo
 }
 
 func createTestEnvironment(t *testing.T, svc Service, userID uuid.UUID, name string, active bool) EnvironmentResponse {
@@ -201,6 +232,64 @@ func TestCreateValidation(t *testing.T) {
 			_, err := svc.Create(context.Background(), userID, input)
 			assertValidationError(t, err)
 		})
+	}
+}
+
+func TestCreateRespondsWithZeroPlants(t *testing.T) {
+	svc := newTestService(t)
+
+	env := createTestEnvironment(t, svc, uuid.New(), "Sala", true)
+
+	if env.PlantCount != 0 {
+		t.Errorf("esperava plant_count=0 em ambiente novo, obteve %d", env.PlantCount)
+	}
+}
+
+func TestReadsExposePlantCount(t *testing.T) {
+	svc, repo := newTestServiceWithRepo(t)
+	ctx := context.Background()
+	userID := uuid.New()
+
+	sala := createTestEnvironment(t, svc, userID, "Sala", true)
+	repo.plantCounts[sala.ID] = 3
+
+	got, err := svc.Get(ctx, userID, sala.ID)
+	if err != nil {
+		t.Fatalf("Get retornou erro: %v", err)
+	}
+	if got.PlantCount != 3 {
+		t.Errorf("Get: esperava plant_count=3, obteve %d", got.PlantCount)
+	}
+
+	list, err := svc.List(ctx, userID, ListInput{})
+	if err != nil {
+		t.Fatalf("List retornou erro: %v", err)
+	}
+	if len(list.Data) != 1 || list.Data[0].PlantCount != 3 {
+		t.Errorf("List: esperava um ambiente com plant_count=3, obteve %+v", list.Data)
+	}
+
+	updated, err := svc.Update(ctx, userID, sala.ID, UpdateInput{Name: "Sala de estar", Active: ptr(true)})
+	if err != nil {
+		t.Fatalf("Update retornou erro: %v", err)
+	}
+	if updated.PlantCount != 3 || updated.Name != "Sala de estar" {
+		t.Errorf("Update: esperava o nome novo e plant_count=3, obteve %+v", updated)
+	}
+}
+
+func TestResponseJSONHasPlantCount(t *testing.T) {
+	resp := NewEnvironmentResponse(EnvironmentView{
+		Environment: domain.Environment{ID: uuid.New(), Name: "Sala", Active: true},
+		PlantCount:  3,
+	})
+
+	body, err := json.Marshal(resp)
+	if err != nil {
+		t.Fatalf("json.Marshal retornou erro: %v", err)
+	}
+	if !strings.Contains(string(body), `"plant_count":3`) {
+		t.Errorf("esperava o campo plant_count no JSON, obteve %s", body)
 	}
 }
 

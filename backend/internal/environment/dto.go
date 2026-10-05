@@ -31,25 +31,35 @@ type ListInput struct {
 	Active *bool // nil lista ativos e inativos
 }
 
-// EnvironmentResponse é a representação pública de um ambiente.
-type EnvironmentResponse struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Notes     *string   `json:"notes"`
-	Active    bool      `json:"active"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+// EnvironmentView é a leitura de um ambiente junto com os dados calculados na
+// consulta. Fica fora de domain.Environment porque esses dados não pertencem à
+// entidade: não são gravados e só existem nas leituras.
+type EnvironmentView struct {
+	domain.Environment
+	PlantCount int // plantas ativas no ambiente
 }
 
-// NewEnvironmentResponse converte um domain.Environment em EnvironmentResponse.
-func NewEnvironmentResponse(e domain.Environment) EnvironmentResponse {
+// EnvironmentResponse é a representação pública de um ambiente.
+type EnvironmentResponse struct {
+	ID         uuid.UUID `json:"id"`
+	Name       string    `json:"name"`
+	Notes      *string   `json:"notes"`
+	Active     bool      `json:"active"`
+	PlantCount int       `json:"plant_count"` // plantas ativas no ambiente
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+}
+
+// NewEnvironmentResponse converte um EnvironmentView em EnvironmentResponse.
+func NewEnvironmentResponse(e EnvironmentView) EnvironmentResponse {
 	return EnvironmentResponse{
-		ID:        e.ID,
-		Name:      e.Name,
-		Notes:     e.Notes,
-		Active:    e.Active,
-		CreatedAt: e.CreatedAt,
-		UpdatedAt: e.UpdatedAt,
+		ID:         e.ID,
+		Name:       e.Name,
+		Notes:      e.Notes,
+		Active:     e.Active,
+		PlantCount: e.PlantCount,
+		CreatedAt:  e.CreatedAt,
+		UpdatedAt:  e.UpdatedAt,
 	}
 }
 

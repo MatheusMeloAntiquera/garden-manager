@@ -139,8 +139,10 @@ Parâmetros de query (todos opcionais):
 Resposta:
 
 ```json
-{ "data": [ { "id": "…", "name": "Cozinha", "notes": null, "active": true, "created_at": "…", "updated_at": "…" } ], "page": 1, "page_size": 20, "total": 1 }
+{ "data": [ { "id": "…", "name": "Cozinha", "notes": null, "active": true, "plant_count": 2, "created_at": "…", "updated_at": "…" } ], "page": 1, "page_size": 20, "total": 1 }
 ```
+
+`plant_count` é a quantidade de plantas **ativas** do ambiente; plantas inativas (arquivadas) não entram na conta. Ele vem na listagem, no `GET` por id e nas respostas de `POST` e `PUT`, e é somente leitura (não vai no corpo das requisições).
 
 ## Catálogo de espécies
 
@@ -199,7 +201,9 @@ Um `species_id` ou `environment_id` inexistente (ou de outro usuário) responde 
 
 ### Listagem
 
-Parâmetros de query (todos opcionais): `environment_id`, `species_id`, `active` (`true` ou `false`), `page` e `page_size`.
+Parâmetros de query (todos opcionais): `environment_id`, `species_id`, `active` (`true` ou `false`), `q`, `page` e `page_size`.
+
+`q` busca por apelido, nome científico ou nome popular da espécie, sem diferenciar maiúsculas nem acentos (`falsa` acha qualquer planta da espécie `Ficus elastica`, cujo nome popular principal é `falsa-seringueira`, mesmo que ela tenha outro apelido). Ele pode ser combinado com os demais filtros.
 
 A resposta traz o resumo da espécie e do ambiente, e `display_name`, que é o apelido ou, sem ele, o nome popular principal da espécie:
 
