@@ -25,6 +25,12 @@ type Repository interface {
 	Delete(ctx context.Context, userID, id uuid.UUID) error
 }
 
+// environmentColumns lista as colunas lidas de um ambiente. plant_count é a
+// contagem de plantas ativas e exige que a tabela tenha o nome environments.
+const environmentColumns = `id, user_id, name, notes, active,
+		(SELECT count(*) FROM plants WHERE plants.environment_id = environments.id AND plants.active),
+		created_at, updated_at`
+
 type postgresRepository struct {
 	pool *pgxpool.Pool
 }
@@ -38,7 +44,7 @@ func (r *postgresRepository) Create(ctx context.Context, env domain.Environment)
 	const query = `
 		INSERT INTO environments (user_id, name, notes, active)
 		VALUES ($1, $2, $3, $4)
-		RETURNING id, user_id, name, notes, active, created_at, updated_at
+		RETURNING ` + environmentColumns + `
 	`
 
 	created, err := scanEnvironment(r.pool.QueryRow(ctx, query, env.UserID, env.Name, env.Notes, env.Active))
@@ -51,7 +57,7 @@ func (r *postgresRepository) Create(ctx context.Context, env domain.Environment)
 
 func (r *postgresRepository) FindByID(ctx context.Context, userID, id uuid.UUID) (domain.Environment, error) {
 	const query = `
-		SELECT id, user_id, name, notes, active, created_at, updated_at
+		SELECT ` + environmentColumns + `
 		FROM environments
 		WHERE id = $1 AND user_id = $2
 	`
@@ -80,7 +86,7 @@ func (r *postgresRepository) List(ctx context.Context, userID uuid.UUID, active 
 	}
 
 	const query = `
-		SELECT id, user_id, name, notes, active, created_at, updated_at
+		SELECT ` + environmentColumns + `
 		FROM environments
 		WHERE user_id = $1 AND ($2::boolean IS NULL OR active = $2)
 		ORDER BY name, created_at
@@ -113,7 +119,7 @@ func (r *postgresRepository) Update(ctx context.Context, env domain.Environment)
 		UPDATE environments
 		SET name = $3, notes = $4, active = $5
 		WHERE id = $1 AND user_id = $2
-		RETURNING id, user_id, name, notes, active, created_at, updated_at
+		RETURNING ` + environmentColumns + `
 	`
 
 	updated, err := scanEnvironment(r.pool.QueryRow(ctx, query, env.ID, env.UserID, env.Name, env.Notes, env.Active))
@@ -148,7 +154,7 @@ type rowScanner interface {
 
 func scanEnvironment(row rowScanner) (domain.Environment, error) {
 	var e domain.Environment
-	err := row.Scan(&e.ID, &e.UserID, &e.Name, &e.Notes, &e.Active, &e.CreatedAt, &e.UpdatedAt)
+	err := row.Scan(&e.ID, &e.UserID, &e.Name, &e.Notes, &e.Active, &e.PlantCount, &e.CreatedAt, &e.UpdatedAt)
 	if err != nil {
 		return domain.Environment{}, err
 	}

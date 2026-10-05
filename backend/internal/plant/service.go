@@ -93,7 +93,9 @@ func (s *service) Get(ctx context.Context, userID, id uuid.UUID) (PlantResponse,
 func (s *service) List(ctx context.Context, userID uuid.UUID, input ListInput) (ListResponse, error) {
 	params := input.Normalize()
 
-	plants, total, err := s.repo.List(ctx, userID, input.EnvironmentID, input.SpeciesID, input.Active, params.PageSize, params.Offset())
+	query := strings.TrimSpace(input.Query)
+
+	plants, total, err := s.repo.List(ctx, userID, input.EnvironmentID, input.SpeciesID, input.Active, query, params.PageSize, params.Offset())
 	if err != nil {
 		return ListResponse{}, err
 	}

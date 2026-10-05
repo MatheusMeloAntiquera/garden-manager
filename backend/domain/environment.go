@@ -15,6 +15,10 @@ type Environment struct {
 	Notes  *string // observações livres; nulo quando não informadas
 	Active bool
 
+	// PlantCount é a quantidade de plantas ativas do ambiente. É calculada na
+	// leitura e não é gravada na tabela.
+	PlantCount int
+
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

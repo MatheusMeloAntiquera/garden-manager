@@ -2,6 +2,7 @@ package environment
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"slices"
 	"strings"
@@ -201,6 +202,22 @@ func TestCreateValidation(t *testing.T) {
 			_, err := svc.Create(context.Background(), userID, input)
 			assertValidationError(t, err)
 		})
+	}
+}
+
+func TestResponseExposesPlantCount(t *testing.T) {
+	resp := NewEnvironmentResponse(domain.Environment{ID: uuid.New(), Name: "Sala", Active: true, PlantCount: 3})
+
+	if resp.PlantCount != 3 {
+		t.Errorf("esperava plant_count=3, obteve %d", resp.PlantCount)
+	}
+
+	body, err := json.Marshal(resp)
+	if err != nil {
+		t.Fatalf("json.Marshal retornou erro: %v", err)
+	}
+	if !strings.Contains(string(body), `"plant_count":3`) {
+		t.Errorf("esperava o campo plant_count no JSON, obteve %s", body)
 	}
 }
 

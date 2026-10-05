@@ -35,7 +35,8 @@ type ListInput struct {
 	pagination.Params
 	EnvironmentID *uuid.UUID
 	SpeciesID     *uuid.UUID
-	Active        *bool // nil lista ativas e inativas
+	Active        *bool  // nil lista ativas e inativas
+	Query         string // busca por apelido, nome científico ou nome popular; vazio não filtra
 }
 
 // SpeciesRef é o resumo da espécie dentro de PlantResponse.

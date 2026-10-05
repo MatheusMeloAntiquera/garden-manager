@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -21,8 +22,10 @@ type Repository interface {
 	FindByID(ctx context.Context, userID, id uuid.UUID) (domain.Plant, error)
 	// List retorna uma página de plantas do usuário, ordenada pelo nome de
 	// exibição, e o total que atende aos filtros (ignorando a paginação).
-	// Filtros nulos não restringem o resultado.
-	List(ctx context.Context, userID uuid.UUID, environmentID, speciesID *uuid.UUID, active *bool, limit, offset int) ([]domain.Plant, int, error)
+	// Filtros nulos não restringem o resultado. query busca no apelido, no nome
+	// científico e nos nomes populares da espécie, ignorando acentos e
+	// maiúsculas; vazio não filtra.
+	List(ctx context.Context, userID uuid.UUID, environmentID, speciesID *uuid.UUID, active *bool, query string, limit, offset int) ([]domain.Plant, int, error)
 	Update(ctx context.Context, plant domain.Plant) (domain.Plant, error)
 	Delete(ctx context.Context, userID, id uuid.UUID) error
 }
@@ -91,27 +94,42 @@ func (r *postgresRepository) FindByID(ctx context.Context, userID, id uuid.UUID)
 	return plant, nil
 }
 
-// listFilter é o WHERE compartilhado por List e pelo count.
+// listFilter é o WHERE compartilhado por List e pelo count. $5 é o texto da
+// busca já escapado para LIKE (vazio = sem busca). A busca usa EXISTS em vez
+// dos aliases de plantJoins porque o count roda sem os joins.
 const listFilter = `
 	WHERE p.user_id = $1
 	AND ($2::uuid IS NULL OR p.environment_id = $2)
 	AND ($3::uuid IS NULL OR p.species_id = $3)
-	AND ($4::boolean IS NULL OR p.active = $4)`
+	AND ($4::boolean IS NULL OR p.active = $4)
+	AND ($5::text = '' OR unaccent(lower(p.nickname)) LIKE '%' || unaccent(lower($5)) || '%'
+		OR EXISTS (
+			SELECT 1 FROM species sp
+			WHERE sp.id = p.species_id
+			AND (unaccent(lower(sp.scientific_name)) LIKE '%' || unaccent(lower($5)) || '%'
+				OR EXISTS (
+					SELECT 1 FROM species_common_names n
+					WHERE n.species_id = sp.id
+					AND unaccent(lower(n.name)) LIKE '%' || unaccent(lower($5)) || '%'
+				))
+		))`
 
-func (r *postgresRepository) List(ctx context.Context, userID uuid.UUID, environmentID, speciesID *uuid.UUID, active *bool, limit, offset int) ([]domain.Plant, int, error) {
+func (r *postgresRepository) List(ctx context.Context, userID uuid.UUID, environmentID, speciesID *uuid.UUID, active *bool, query string, limit, offset int) ([]domain.Plant, int, error) {
+	pattern := escapeLike(query)
+
 	var total int
-	err := r.pool.QueryRow(ctx, `SELECT count(*) FROM plants p`+listFilter, userID, environmentID, speciesID, active).Scan(&total)
+	err := r.pool.QueryRow(ctx, `SELECT count(*) FROM plants p`+listFilter, userID, environmentID, speciesID, active, pattern).Scan(&total)
 	if err != nil {
 		return nil, 0, fmt.Errorf("contando plantas: %w", err)
 	}
 
-	const query = `
+	const listQuery = `
 		SELECT ` + plantColumns + `
 		FROM plants p ` + plantJoins + listFilter + `
 		ORDER BY lower(coalesce(p.nickname, cn.name, s.scientific_name)), p.created_at
-		LIMIT $5 OFFSET $6`
+		LIMIT $6 OFFSET $7`
 
-	rows, err := r.pool.Query(ctx, query, userID, environmentID, speciesID, active, limit, offset)
+	rows, err := r.pool.Query(ctx, listQuery, userID, environmentID, speciesID, active, pattern, limit, offset)
 	if err != nil {
 		return nil, 0, fmt.Errorf("listando plantas: %w", err)
 	}
@@ -167,6 +185,12 @@ func (r *postgresRepository) Delete(ctx context.Context, userID, id uuid.UUID) e
 	}
 
 	return nil
+}
+
+// escapeLike escapa os caracteres especiais do LIKE, para que a busca do
+// usuário seja tratada como texto literal.
+func escapeLike(s string) string {
+	return strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`).Replace(s)
 }
 
 // rowScanner abstrai pgx.Row e pgx.Rows para reaproveitar scanPlant.

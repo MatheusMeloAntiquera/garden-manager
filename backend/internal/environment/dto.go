@@ -33,23 +33,25 @@ type ListInput struct {
 
 // EnvironmentResponse é a representação pública de um ambiente.
 type EnvironmentResponse struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Notes     *string   `json:"notes"`
-	Active    bool      `json:"active"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID         uuid.UUID `json:"id"`
+	Name       string    `json:"name"`
+	Notes      *string   `json:"notes"`
+	Active     bool      `json:"active"`
+	PlantCount int       `json:"plant_count"` // plantas ativas no ambiente
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }
 
 // NewEnvironmentResponse converte um domain.Environment em EnvironmentResponse.
 func NewEnvironmentResponse(e domain.Environment) EnvironmentResponse {
 	return EnvironmentResponse{
-		ID:        e.ID,
-		Name:      e.Name,
-		Notes:     e.Notes,
-		Active:    e.Active,
-		CreatedAt: e.CreatedAt,
-		UpdatedAt: e.UpdatedAt,
+		ID:         e.ID,
+		Name:       e.Name,
+		Notes:      e.Notes,
+		Active:     e.Active,
+		PlantCount: e.PlantCount,
+		CreatedAt:  e.CreatedAt,
+		UpdatedAt:  e.UpdatedAt,
 	}
 }
 
