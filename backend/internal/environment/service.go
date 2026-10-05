@@ -55,28 +55,29 @@ func (s *service) Create(ctx context.Context, userID uuid.UUID, input CreateInpu
 		return EnvironmentResponse{}, err
 	}
 
-	return NewEnvironmentResponse(env), nil
+	// Um ambiente recém-criado ainda não tem plantas, então não há o que contar.
+	return NewEnvironmentResponse(EnvironmentView{Environment: env}), nil
 }
 
 func (s *service) Get(ctx context.Context, userID, id uuid.UUID) (EnvironmentResponse, error) {
-	env, err := s.repo.FindByID(ctx, userID, id)
+	view, err := s.repo.FindViewByID(ctx, userID, id)
 	if err != nil {
 		return EnvironmentResponse{}, err
 	}
-	return NewEnvironmentResponse(env), nil
+	return NewEnvironmentResponse(view), nil
 }
 
 func (s *service) List(ctx context.Context, userID uuid.UUID, input ListInput) (ListResponse, error) {
 	params := input.Normalize()
 
-	envs, total, err := s.repo.List(ctx, userID, input.Active, params.PageSize, params.Offset())
+	views, total, err := s.repo.List(ctx, userID, input.Active, params.PageSize, params.Offset())
 	if err != nil {
 		return ListResponse{}, err
 	}
 
-	data := make([]EnvironmentResponse, 0, len(envs))
-	for _, env := range envs {
-		data = append(data, NewEnvironmentResponse(env))
+	data := make([]EnvironmentResponse, 0, len(views))
+	for _, view := range views {
+		data = append(data, NewEnvironmentResponse(view))
 	}
 
 	return ListResponse{
@@ -95,7 +96,7 @@ func (s *service) Update(ctx context.Context, userID, id uuid.UUID, input Update
 		return EnvironmentResponse{}, err
 	}
 
-	env, err := s.repo.Update(ctx, domain.Environment{
+	_, err := s.repo.Update(ctx, domain.Environment{
 		ID:     id,
 		UserID: userID,
 		Name:   input.Name,
@@ -106,7 +107,8 @@ func (s *service) Update(ctx context.Context, userID, id uuid.UUID, input Update
 		return EnvironmentResponse{}, err
 	}
 
-	return NewEnvironmentResponse(env), nil
+	// Relê como EnvironmentView para responder com a contagem de plantas.
+	return s.Get(ctx, userID, id)
 }
 
 func (s *service) Delete(ctx context.Context, userID, id uuid.UUID) error {

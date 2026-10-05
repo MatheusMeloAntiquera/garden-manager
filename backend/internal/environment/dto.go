@@ -31,6 +31,14 @@ type ListInput struct {
 	Active *bool // nil lista ativos e inativos
 }
 
+// EnvironmentView é a leitura de um ambiente junto com os dados calculados na
+// consulta. Fica fora de domain.Environment porque esses dados não pertencem à
+// entidade: não são gravados e só existem nas leituras.
+type EnvironmentView struct {
+	domain.Environment
+	PlantCount int // plantas ativas no ambiente
+}
+
 // EnvironmentResponse é a representação pública de um ambiente.
 type EnvironmentResponse struct {
 	ID         uuid.UUID `json:"id"`
@@ -42,8 +50,8 @@ type EnvironmentResponse struct {
 	UpdatedAt  time.Time `json:"updated_at"`
 }
 
-// NewEnvironmentResponse converte um domain.Environment em EnvironmentResponse.
-func NewEnvironmentResponse(e domain.Environment) EnvironmentResponse {
+// NewEnvironmentResponse converte um EnvironmentView em EnvironmentResponse.
+func NewEnvironmentResponse(e EnvironmentView) EnvironmentResponse {
 	return EnvironmentResponse{
 		ID:         e.ID,
 		Name:       e.Name,
