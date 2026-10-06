@@ -36,30 +36,33 @@ type ListInput struct {
 // entidade: não são gravados e só existem nas leituras.
 type EnvironmentView struct {
 	domain.Environment
-	PlantCount int // plantas ativas no ambiente
+	PlantCount   int // plantas ativas no ambiente
+	OverdueCount int // agendamentos vencidos das plantas ativas do ambiente
 }
 
 // EnvironmentResponse é a representação pública de um ambiente.
 type EnvironmentResponse struct {
-	ID         uuid.UUID `json:"id"`
-	Name       string    `json:"name"`
-	Notes      *string   `json:"notes"`
-	Active     bool      `json:"active"`
-	PlantCount int       `json:"plant_count"` // plantas ativas no ambiente
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	Notes        *string   `json:"notes"`
+	Active       bool      `json:"active"`
+	PlantCount   int       `json:"plant_count"`   // plantas ativas no ambiente
+	OverdueCount int       `json:"overdue_count"` // agendamentos vencidos das plantas ativas do ambiente
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 // NewEnvironmentResponse converte um EnvironmentView em EnvironmentResponse.
 func NewEnvironmentResponse(e EnvironmentView) EnvironmentResponse {
 	return EnvironmentResponse{
-		ID:         e.ID,
-		Name:       e.Name,
-		Notes:      e.Notes,
-		Active:     e.Active,
-		PlantCount: e.PlantCount,
-		CreatedAt:  e.CreatedAt,
-		UpdatedAt:  e.UpdatedAt,
+		ID:           e.ID,
+		Name:         e.Name,
+		Notes:        e.Notes,
+		Active:       e.Active,
+		PlantCount:   e.PlantCount,
+		OverdueCount: e.OverdueCount,
+		CreatedAt:    e.CreatedAt,
+		UpdatedAt:    e.UpdatedAt,
 	}
 }
 

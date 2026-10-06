@@ -19,23 +19,25 @@ import (
 )
 
 // fakeRepository é uma implementação em memória de Repository, usada para
-// testar o service sem depender de um Postgres real. plantCounts faz o papel
-// da contagem de plantas ativas que o Postgres calcula na consulta.
+// testar o service sem depender de um Postgres real. plantCounts e
+// overdueCounts fazem o papel das contagens que o Postgres calcula na consulta.
 type fakeRepository struct {
-	mu          sync.Mutex
-	byID        map[uuid.UUID]domain.Environment
-	plantCounts map[uuid.UUID]int
+	mu            sync.Mutex
+	byID          map[uuid.UUID]domain.Environment
+	plantCounts   map[uuid.UUID]int
+	overdueCounts map[uuid.UUID]int
 }
 
 func newFakeRepository() *fakeRepository {
 	return &fakeRepository{
-		byID:        make(map[uuid.UUID]domain.Environment),
-		plantCounts: make(map[uuid.UUID]int),
+		byID:          make(map[uuid.UUID]domain.Environment),
+		plantCounts:   make(map[uuid.UUID]int),
+		overdueCounts: make(map[uuid.UUID]int),
 	}
 }
 
 func (f *fakeRepository) view(env domain.Environment) EnvironmentView {
-	return EnvironmentView{Environment: env, PlantCount: f.plantCounts[env.ID]}
+	return EnvironmentView{Environment: env, PlantCount: f.plantCounts[env.ID], OverdueCount: f.overdueCounts[env.ID]}
 }
 
 func (f *fakeRepository) Create(_ context.Context, env domain.Environment) (domain.Environment, error) {
@@ -240,56 +242,60 @@ func TestCreateRespondsWithZeroPlants(t *testing.T) {
 
 	env := createTestEnvironment(t, svc, uuid.New(), "Sala", true)
 
-	if env.PlantCount != 0 {
-		t.Errorf("esperava plant_count=0 em ambiente novo, obteve %d", env.PlantCount)
+	if env.PlantCount != 0 || env.OverdueCount != 0 {
+		t.Errorf("esperava plant_count=0 e overdue_count=0 em ambiente novo, obteve %d e %d", env.PlantCount, env.OverdueCount)
 	}
 }
 
-func TestReadsExposePlantCount(t *testing.T) {
+func TestReadsExposeCounts(t *testing.T) {
 	svc, repo := newTestServiceWithRepo(t)
 	ctx := context.Background()
 	userID := uuid.New()
 
 	sala := createTestEnvironment(t, svc, userID, "Sala", true)
 	repo.plantCounts[sala.ID] = 3
+	repo.overdueCounts[sala.ID] = 2
 
 	got, err := svc.Get(ctx, userID, sala.ID)
 	if err != nil {
 		t.Fatalf("Get retornou erro: %v", err)
 	}
-	if got.PlantCount != 3 {
-		t.Errorf("Get: esperava plant_count=3, obteve %d", got.PlantCount)
+	if got.PlantCount != 3 || got.OverdueCount != 2 {
+		t.Errorf("Get: esperava plant_count=3 e overdue_count=2, obteve %d e %d", got.PlantCount, got.OverdueCount)
 	}
 
 	list, err := svc.List(ctx, userID, ListInput{})
 	if err != nil {
 		t.Fatalf("List retornou erro: %v", err)
 	}
-	if len(list.Data) != 1 || list.Data[0].PlantCount != 3 {
-		t.Errorf("List: esperava um ambiente com plant_count=3, obteve %+v", list.Data)
+	if len(list.Data) != 1 || list.Data[0].PlantCount != 3 || list.Data[0].OverdueCount != 2 {
+		t.Errorf("List: esperava um ambiente com plant_count=3 e overdue_count=2, obteve %+v", list.Data)
 	}
 
 	updated, err := svc.Update(ctx, userID, sala.ID, UpdateInput{Name: "Sala de estar", Active: ptr(true)})
 	if err != nil {
 		t.Fatalf("Update retornou erro: %v", err)
 	}
-	if updated.PlantCount != 3 || updated.Name != "Sala de estar" {
-		t.Errorf("Update: esperava o nome novo e plant_count=3, obteve %+v", updated)
+	if updated.PlantCount != 3 || updated.OverdueCount != 2 || updated.Name != "Sala de estar" {
+		t.Errorf("Update: esperava o nome novo, plant_count=3 e overdue_count=2, obteve %+v", updated)
 	}
 }
 
-func TestResponseJSONHasPlantCount(t *testing.T) {
+func TestResponseJSONHasCounts(t *testing.T) {
 	resp := NewEnvironmentResponse(EnvironmentView{
-		Environment: domain.Environment{ID: uuid.New(), Name: "Sala", Active: true},
-		PlantCount:  3,
+		Environment:  domain.Environment{ID: uuid.New(), Name: "Sala", Active: true},
+		PlantCount:   3,
+		OverdueCount: 1,
 	})
 
 	body, err := json.Marshal(resp)
 	if err != nil {
 		t.Fatalf("json.Marshal retornou erro: %v", err)
 	}
-	if !strings.Contains(string(body), `"plant_count":3`) {
-		t.Errorf("esperava o campo plant_count no JSON, obteve %s", body)
+	for _, want := range []string{`"plant_count":3`, `"overdue_count":1`} {
+		if !strings.Contains(string(body), want) {
+			t.Errorf("esperava %s no JSON, obteve %s", want, body)
+		}
 	}
 }
 
