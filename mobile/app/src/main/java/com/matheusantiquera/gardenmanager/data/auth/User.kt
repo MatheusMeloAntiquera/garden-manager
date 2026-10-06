@@ -20,6 +20,10 @@ data class User(
             }
             return letters.uppercase()
         }
+
+    /** Primeiro nome, para a saudação. */
+    val firstName: String
+        get() = name.trim().split(Regex("\\s+")).first()
 }
 
 private val BirthDateDisplayFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")

@@ -1,6 +1,7 @@
 package com.matheusantiquera.gardenmanager.core.designsystem
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -46,6 +48,8 @@ fun GardenTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     enabled: Boolean = true,
+    singleLine: Boolean = true,
+    minLines: Int = 1,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
@@ -60,7 +64,8 @@ fun GardenTextField(
                 .fillMaxWidth()
                 .semantics { contentDescription = label },
             enabled = enabled,
-            singleLine = true,
+            singleLine = singleLine,
+            minLines = minLines,
             shape = RoundedCornerShape(14.dp),
             textStyle = MaterialTheme.typography.bodyLarge,
             placeholder = placeholder?.let { { Text(it) } },
@@ -114,6 +119,27 @@ fun PrimaryButton(
         } else {
             Text(text = text, style = MaterialTheme.typography.labelLarge)
         }
+    }
+}
+
+/** Botão secundário: mesma altura e formato do [PrimaryButton], com contorno em vez de preenchimento. */
+@Composable
+fun SecondaryButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(54.dp),
+        enabled = enabled,
+        shape = CircleShape,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+    ) {
+        Text(text = text, style = MaterialTheme.typography.labelLarge)
     }
 }
 

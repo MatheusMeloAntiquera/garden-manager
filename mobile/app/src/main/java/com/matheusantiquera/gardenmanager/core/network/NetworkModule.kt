@@ -3,6 +3,7 @@ package com.matheusantiquera.gardenmanager.core.network
 import com.matheusantiquera.gardenmanager.BuildConfig
 import com.matheusantiquera.gardenmanager.data.auth.AuthApi
 import com.matheusantiquera.gardenmanager.data.auth.UserApi
+import com.matheusantiquera.gardenmanager.data.environment.EnvironmentApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -67,4 +68,9 @@ object NetworkModule {
     @Singleton
     fun provideUserApi(@Named(AUTHENTICATED) client: OkHttpClient): UserApi =
         retrofit(client).create(UserApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideEnvironmentApi(@Named(AUTHENTICATED) client: OkHttpClient): EnvironmentApi =
+        retrofit(client).create(EnvironmentApi::class.java)
 }
