@@ -25,6 +25,14 @@ data object ScheduleRoute
 @Serializable
 data object ProfileRoute
 
+// Telas secundárias, abertas a partir das abas.
+@Serializable
+data object ArchivedEnvironmentsRoute
+
+/** Formulário de ambiente: com [id] edita, sem ele cria um novo. */
+@Serializable
+data class EnvironmentFormRoute(val id: String? = null)
+
 /** Item da barra de navegação inferior. */
 enum class TopLevelDestination(
     val route: Any,

@@ -6,7 +6,12 @@ Aplicativo Android desenvolvido em Kotlin com Jetpack Compose. O design das tela
 
 - Entrar, criar conta e sair, com renovação automática da sessão (refresh token).
 - Perfil com os dados da conta e escolha de tema (do sistema, claro ou escuro).
-- Abas Ambientes, Plantas e Agenda ainda são telas provisórias ("Em breve").
+- Aba Ambientes:
+  - saudação com o primeiro nome do usuário;
+  - cards com a quantidade de plantas ativas e de manutenções atrasadas de cada ambiente;
+  - criar, editar, arquivar (desativar), reativar e excluir ambientes, com aviso de "Salvando…" e mensagem de confirmação;
+  - os ambientes arquivados ficam em "Ver arquivados", no fim da lista.
+- Abas Plantas e Agenda ainda são telas provisórias ("Em breve").
 
 ## Stack
 

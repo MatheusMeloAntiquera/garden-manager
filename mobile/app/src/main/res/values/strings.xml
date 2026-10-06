@@ -70,4 +70,68 @@
     <string name="profile_logout">Sair da conta</string>
     <string name="profile_load_error">Não foi possível carregar seus dados.</string>
     <string name="action_cancel">Cancelar</string>
+    <string name="action_close">Fechar</string>
+    <string name="action_save">Salvar</string>
+    <string name="action_delete">Excluir</string>
+
+    <!-- Ambientes -->
+    <string name="environments_greeting">Olá, %1$s</string>
+    <string name="environments_title">Seus ambientes</string>
+    <string name="environments_new">Novo ambiente</string>
+    <string name="environments_show_archived">Ver arquivados</string>
+    <string name="environments_load_error">Não foi possível carregar seus ambientes.</string>
+    <string name="environments_empty_title">Nenhum ambiente ainda</string>
+    <string name="environments_empty_description">Crie um ambiente, como Sala ou Varanda, para organizar suas plantas.</string>
+    <string name="environments_archived_title">Ambientes arquivados</string>
+    <string name="environments_archived_empty_title">Nenhum ambiente arquivado</string>
+    <string name="environments_archived_empty_description">Ambientes desativados aparecem aqui. Abra um deles para reativar.</string>
+    <!-- Em português, a regra "one" também vale para 0; por isso o zero tem string própria. -->
+    <string name="environment_no_plants">Nenhuma planta</string>
+    <plurals name="environment_plant_count">
+        <item quantity="one">%d planta</item>
+        <item quantity="many">%d plantas</item>
+        <item quantity="other">%d plantas</item>
+    </plurals>
+    <!-- Só aparece com 1 ou mais, então o zero não precisa de string própria. O 1 vai por extenso. -->
+    <plurals name="environment_overdue_count">
+        <item quantity="one">Uma manutenção atrasada</item>
+        <item quantity="many">%d manutenções atrasadas</item>
+        <item quantity="other">%d manutenções atrasadas</item>
+    </plurals>
+    <string name="environment_created">Ambiente criado</string>
+    <string name="environment_updated">Alterações salvas</string>
+    <string name="environment_deleted">Ambiente excluído</string>
+
+    <!-- Formulário de ambiente -->
+    <string name="environment_form_new_title">Novo ambiente</string>
+    <string name="environment_form_edit_title">Editar ambiente</string>
+    <string name="environment_load_error">Não foi possível carregar o ambiente.</string>
+    <string name="field_environment_name">Nome</string>
+    <string name="field_environment_name_placeholder">Ex.: Sala de estar</string>
+    <string name="field_notes">Observações</string>
+    <string name="field_environment_notes_placeholder">Ex.: Janela leste, luz da manhã</string>
+    <string name="environment_active">Ambiente ativo</string>
+    <string name="environment_active_description">Desative para esconder da lista sem excluir</string>
+    <string name="environment_form_no_plants">Nenhuma planta neste ambiente</string>
+    <plurals name="environment_form_plant_count">
+        <item quantity="one">%d planta neste ambiente</item>
+        <item quantity="many">%d plantas neste ambiente</item>
+        <item quantity="other">%d plantas neste ambiente</item>
+    </plurals>
+    <string name="environment_delete">Excluir ambiente</string>
+    <string name="environment_saving">Salvando…</string>
+    <string name="environment_deleting">Excluindo…</string>
+    <string name="validation_environment_name_required">Informe o nome do ambiente.</string>
+    <string name="validation_environment_name_too_long">O nome pode ter no máximo 100 caracteres.</string>
+    <string name="validation_notes_too_long">As observações podem ter no máximo 2000 caracteres.</string>
+
+    <!-- Exclusão de ambiente. <b> e <br> vão escapados e são interpretados por AnnotatedString.fromHtml;
+         o <br><br> separa as duas frases com uma linha em branco. -->
+    <string name="environment_delete_title">Excluir ambiente?</string>
+    <string name="environment_delete_message_no_plants">“%1$s” será excluído.</string>
+    <plurals name="environment_delete_message">
+        <item quantity="one">“%1$s” será excluído.&lt;br&gt;&lt;br&gt;A planta dele &lt;b&gt;não será apagada&lt;/b&gt;: ficará sem ambiente e continua na aba Plantas.</item>
+        <item quantity="many">“%1$s” será excluído.&lt;br&gt;&lt;br&gt;As %2$d plantas dele &lt;b&gt;não serão apagadas&lt;/b&gt;: ficarão sem ambiente e continuam na aba Plantas.</item>
+        <item quantity="other">“%1$s” será excluído.&lt;br&gt;&lt;br&gt;As %2$d plantas dele &lt;b&gt;não serão apagadas&lt;/b&gt;: ficarão sem ambiente e continuam na aba Plantas.</item>
+    </plurals>
 </resources>
