@@ -139,10 +139,10 @@ Parâmetros de query (todos opcionais):
 Resposta:
 
 ```json
-{ "data": [ { "id": "…", "name": "Cozinha", "notes": null, "active": true, "plant_count": 2, "created_at": "…", "updated_at": "…" } ], "page": 1, "page_size": 20, "total": 1 }
+{ "data": [ { "id": "…", "name": "Cozinha", "notes": null, "active": true, "plant_count": 2, "overdue_count": 1, "created_at": "…", "updated_at": "…" } ], "page": 1, "page_size": 20, "total": 1 }
 ```
 
-`plant_count` é a quantidade de plantas **ativas** do ambiente; plantas inativas (arquivadas) não entram na conta. Ele vem na listagem, no `GET` por id e nas respostas de `POST` e `PUT`, e é somente leitura (não vai no corpo das requisições).
+`plant_count` é a quantidade de plantas **ativas** do ambiente; plantas inativas (arquivadas) não entram na conta. `overdue_count` é a quantidade de agendamentos de manutenção vencidos (status `overdue`, prazo antes de agora) dessas mesmas plantas ativas. Os dois vêm na listagem, no `GET` por id e nas respostas de `POST` e `PUT`, e são somente leitura (não vão no corpo das requisições).
 
 ## Catálogo de espécies
 

@@ -214,7 +214,7 @@
       "_type": "request",
       "parentId": "fld_environments",
       "name": "List Environments",
-      "description": "Lista os ambientes do usuário, ordenados por nome. Cada ambiente traz plant_count, a quantidade de plantas ativas dele. Parâmetros opcionais: page, page_size (1 a 100) e active (true/false).",
+      "description": "Lista os ambientes do usuário, ordenados por nome. Cada ambiente traz plant_count, a quantidade de plantas ativas dele, e overdue_count, os agendamentos vencidos dessas plantas. Parâmetros opcionais: page, page_size (1 a 100) e active (true/false).",
       "method": "GET",
       "url": "{{ _.base_url }}/api/v1/environments",
       "body": {},

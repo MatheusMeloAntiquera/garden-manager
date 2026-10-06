@@ -35,10 +35,14 @@ const (
 	environmentColumns = `id, user_id, name, notes, active, created_at, updated_at`
 
 	// viewColumns são as colunas de EnvironmentView, lidas por
-	// scanEnvironmentView. A contagem considera só plantas ativas e exige que a
-	// tabela tenha o nome environments.
+	// scanEnvironmentView. As contagens consideram só plantas ativas e exigem
+	// que a tabela tenha o nome environments. "Vencido" segue o mesmo critério
+	// do status overdue dos agendamentos: due_at antes de agora.
 	viewColumns = environmentColumns + `,
-		(SELECT count(*) FROM plants WHERE plants.environment_id = environments.id AND plants.active)`
+		(SELECT count(*) FROM plants WHERE plants.environment_id = environments.id AND plants.active),
+		(SELECT count(*) FROM maintenance_schedules s
+			JOIN plants sp ON sp.id = s.plant_id
+			WHERE sp.environment_id = environments.id AND sp.active AND s.due_at < now())`
 )
 
 type postgresRepository struct {
@@ -191,7 +195,7 @@ func scanEnvironment(row rowScanner) (domain.Environment, error) {
 // scanEnvironmentView lê as colunas de viewColumns.
 func scanEnvironmentView(row rowScanner) (EnvironmentView, error) {
 	var v EnvironmentView
-	err := row.Scan(&v.ID, &v.UserID, &v.Name, &v.Notes, &v.Active, &v.CreatedAt, &v.UpdatedAt, &v.PlantCount)
+	err := row.Scan(&v.ID, &v.UserID, &v.Name, &v.Notes, &v.Active, &v.CreatedAt, &v.UpdatedAt, &v.PlantCount, &v.OverdueCount)
 	if err != nil {
 		return EnvironmentView{}, err
 	}
