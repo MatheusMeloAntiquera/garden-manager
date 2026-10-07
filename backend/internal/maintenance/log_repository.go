@@ -117,10 +117,11 @@ const logListFilter = `
 	AND ($2::uuid IS NULL OR m.plant_id = $2)
 	AND ($3::uuid IS NULL OR m.type_id = $3)
 	AND ($4::timestamptz IS NULL OR m.performed_at >= $4)
-	AND ($5::timestamptz IS NULL OR m.performed_at <= $5)`
+	AND ($5::timestamptz IS NULL OR m.performed_at <= $5)
+	AND ($6::bool IS NULL OR EXISTS (SELECT 1 FROM plants p WHERE p.id = m.plant_id AND p.active = $6))`
 
 func (r *postgresLogRepository) List(ctx context.Context, userID uuid.UUID, filter LogFilter, limit, offset int) ([]domain.MaintenanceLog, int, error) {
-	args := []any{userID, filter.PlantID, filter.TypeID, filter.PerformedFrom, filter.PerformedTo}
+	args := []any{userID, filter.PlantID, filter.TypeID, filter.PerformedFrom, filter.PerformedTo, filter.PlantActive}
 
 	var total int
 	if err := r.pool.QueryRow(ctx, `SELECT count(*) FROM maintenance_logs m`+logListFilter, args...).Scan(&total); err != nil {
@@ -131,7 +132,7 @@ func (r *postgresLogRepository) List(ctx context.Context, userID uuid.UUID, filt
 		SELECT ` + logColumns + `
 		FROM maintenance_logs m ` + logJoins + logListFilter + `
 		ORDER BY m.performed_at DESC, m.created_at DESC
-		LIMIT $6 OFFSET $7`
+		LIMIT $7 OFFSET $8`
 
 	rows, err := r.pool.Query(ctx, query, append(args, limit, offset)...)
 	if err != nil {

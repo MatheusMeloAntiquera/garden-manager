@@ -80,7 +80,7 @@ func (s *service) CreateSchedule(ctx context.Context, userID uuid.UUID, input Sc
 		return ScheduleResponse{}, err
 	}
 
-	if err := s.checkReferences(ctx, userID, *input.PlantID, *input.TypeID); err != nil {
+	if err := s.checkReferences(ctx, userID, *input.PlantID, *input.TypeID, true); err != nil {
 		return ScheduleResponse{}, err
 	}
 
@@ -110,11 +110,12 @@ func (s *service) ListSchedules(ctx context.Context, userID uuid.UUID, input Lis
 	params := input.Normalize()
 
 	schedules, total, err := s.schedules.List(ctx, userID, ScheduleFilter{
-		PlantID: input.PlantID,
-		TypeID:  input.TypeID,
-		Status:  input.Status,
-		DueFrom: timeOf(input.DueFrom),
-		DueTo:   timeOf(input.DueTo),
+		PlantID:     input.PlantID,
+		TypeID:      input.TypeID,
+		Status:      input.Status,
+		DueFrom:     timeOf(input.DueFrom),
+		DueTo:       timeOf(input.DueTo),
+		PlantActive: input.PlantActive,
 	}, params.PageSize, params.Offset())
 	if err != nil {
 		return ListResponse[ScheduleResponse]{}, err
@@ -145,7 +146,7 @@ func (s *service) UpdateSchedule(ctx context.Context, userID, id uuid.UUID, inpu
 		return ScheduleResponse{}, err
 	}
 
-	if err := s.checkReferences(ctx, userID, *input.PlantID, *input.TypeID); err != nil {
+	if err := s.checkReferences(ctx, userID, *input.PlantID, *input.TypeID, false); err != nil {
 		return ScheduleResponse{}, err
 	}
 
@@ -204,7 +205,7 @@ func (s *service) CreateLog(ctx context.Context, userID uuid.UUID, input CreateL
 		}
 	}
 
-	if err := s.checkReferences(ctx, userID, *input.PlantID, *input.TypeID); err != nil {
+	if err := s.checkReferences(ctx, userID, *input.PlantID, *input.TypeID, true); err != nil {
 		return LogResponse{}, err
 	}
 
@@ -246,6 +247,7 @@ func (s *service) ListLogs(ctx context.Context, userID uuid.UUID, input ListLogs
 		TypeID:        input.TypeID,
 		PerformedFrom: timeOf(input.PerformedFrom),
 		PerformedTo:   timeOf(input.PerformedTo),
+		PlantActive:   input.PlantActive,
 	}, params.PageSize, params.Offset())
 	if err != nil {
 		return ListResponse[LogResponse]{}, err
@@ -279,7 +281,7 @@ func (s *service) UpdateLog(ctx context.Context, userID, id uuid.UUID, input Upd
 		return LogResponse{}, ErrPerformedAtInFuture
 	}
 
-	if err := s.checkReferences(ctx, userID, *input.PlantID, *input.TypeID); err != nil {
+	if err := s.checkReferences(ctx, userID, *input.PlantID, *input.TypeID, false); err != nil {
 		return LogResponse{}, err
 	}
 
@@ -303,13 +305,18 @@ func (s *service) DeleteLog(ctx context.Context, userID, id uuid.UUID) error {
 }
 
 // checkReferences confere que a planta pertence ao usuário e que o tipo
-// existe no catálogo.
-func (s *service) checkReferences(ctx context.Context, userID, plantID, typeID uuid.UUID) error {
-	if _, err := s.plants.FindByID(ctx, userID, plantID); err != nil {
+// existe no catálogo. Com requireActive (criação de agendamento ou execução),
+// recusa também a planta arquivada.
+func (s *service) checkReferences(ctx context.Context, userID, plantID, typeID uuid.UUID, requireActive bool) error {
+	p, err := s.plants.FindByID(ctx, userID, plantID)
+	if err != nil {
 		if errors.Is(err, plant.ErrPlantNotFound) {
 			return ErrInvalidPlant
 		}
 		return err
+	}
+	if requireActive && !p.Active {
+		return ErrArchivedPlant
 	}
 
 	if _, err := s.types.FindByID(ctx, typeID); err != nil {

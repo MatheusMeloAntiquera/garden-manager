@@ -25,6 +25,8 @@ type ScheduleFilter struct {
 	Status  *domain.MaintenanceStatus
 	DueFrom *time.Time
 	DueTo   *time.Time
+	// PlantActive restringe a plantas ativas (true) ou arquivadas (false).
+	PlantActive *bool
 }
 
 // ScheduleRepository dá acesso aos agendamentos. Todas as operações recebem
@@ -48,6 +50,8 @@ type LogFilter struct {
 	TypeID        *uuid.UUID
 	PerformedFrom *time.Time
 	PerformedTo   *time.Time
+	// PlantActive restringe a plantas ativas (true) ou arquivadas (false).
+	PlantActive *bool
 }
 
 // LogRepository dá acesso às execuções, com as mesmas garantias de
