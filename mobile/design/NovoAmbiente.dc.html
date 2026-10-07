@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Novo ambiente</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+input::placeholder, textarea::placeholder{color:#6B776E}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F6F1; color: #18211B; font-family: 'Manrope', sans-serif; display: flex; flex-direction: column; overflow: hidden">
+<header style="display: flex; align-items: center; gap: 4px; padding: 16px 8px 8px">
+<a href="Ambientes.dc.html" aria-label="Fechar" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #18211B">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+</a>
+<h1 style="margin: 0; font-size: 20px; font-weight: 800">Novo ambiente</h1>
+</header>
+
+<form style="flex-grow: 1; padding: 8px 20px 24px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="nome" style="font-size: 13px; font-weight: 700; color: #4E5B52">Nome</label>
+<input id="nome" type="text" placeholder="Ex.: Sala de estar" style="height: 54px; box-sizing: border-box; padding: 0 16px; background: #FFFFFF; border: 2px solid #2E5E45; border-radius: 14px; font-family: inherit; font-size: 16px; color: #18211B; outline: none">
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="obs" style="font-size: 13px; font-weight: 700; color: #4E5B52">Observações</label>
+<textarea id="obs" rows="3" placeholder="Ex.: Janela leste, luz da manhã" style="box-sizing: border-box; padding: 14px 16px; background: #FFFFFF; border: 1px solid #C3CCC2; border-radius: 14px; font-family: inherit; font-size: 16px; line-height: 1.45; color: #18211B; outline: none; resize: none"></textarea>
+</div>
+
+<div style="margin-top: auto; display: flex; gap: 12px">
+<a href="Ambientes.dc.html" style="flex: 1; height: 54px; box-sizing: border-box; border-radius: 27px; border: 1px solid #C3CCC2; color: #2E5E45; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; text-decoration: none">Cancelar</a>
+<a href="AmbienteCriado.dc.html" style="flex: 1; height: 54px; border-radius: 27px; background: #2E5E45; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; text-decoration: none">Salvar</a>
+</div>
+</form>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

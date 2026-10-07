@@ -17,7 +17,12 @@
     "AcoesAgendamento.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Ações do agendamento", "w": 390, "x": 1410, "y": 3708 },
     "ConfirmarExcluirAgendamento.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Confirmar: excluir agendamento", "w": 390, "x": 1880, "y": 3708 },
     "AcoesRegistro.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Ações do registro", "w": 390, "x": 2350, "y": 3708 },
-    "ConfirmarExcluirRegistro.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Confirmar: excluir registro", "w": 390, "x": 2820, "y": 3708 }
+    "ConfirmarExcluirRegistro.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Confirmar: excluir registro", "w": 390, "x": 2820, "y": 3708 },
+    "NovoAmbiente.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Novo ambiente", "w": 390, "x": 0, "y": 4672 },
+    "AmbientesArquivados.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Ambientes arquivados", "w": 390, "x": 470, "y": 4672 },
+    "SalvandoAmbiente.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Salvando ambiente", "w": 390, "x": 940, "y": 4672 },
+    "ExcluindoAmbiente.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Excluindo ambiente", "w": 390, "x": 1410, "y": 4672 },
+    "AmbienteCriado.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Ambientes: mensagem de criado", "w": 390, "x": 1880, "y": 4672 }
   },
   "createdOnFiles": { "at": "2026-10-01T12:00:00Z", "v": 1 },
   "designSystems": [],
@@ -26,6 +31,7 @@
     "linhaA": { "kind": "title1", "maxW": 1800, "text": "Acesso, ambientes e plantas", "w": 240, "x": 0, "y": 880 },
     "linhaB": { "kind": "title1", "maxW": 1800, "text": "Planta, agenda e perfil", "w": 240, "x": 0, "y": 2144 },
     "linhaC": { "kind": "title1", "maxW": 3210, "text": "Edição e exclusões", "x": 0, "y": 3408 },
+    "linhaD": { "kind": "title1", "maxW": 2270, "text": "Ambientes: telas e estados novos", "w": 240, "x": 0, "y": 4372 },
     "paleta": { "kind": "title1", "maxW": 1200, "text": "Paleta e tipografia", "w": 240, "x": 0, "y": -300 }
   },
   "order": [
@@ -44,7 +50,12 @@
     "AcoesAgendamento.dc.html",
     "ConfirmarExcluirAgendamento.dc.html",
     "AcoesRegistro.dc.html",
-    "ConfirmarExcluirRegistro.dc.html"
+    "ConfirmarExcluirRegistro.dc.html",
+    "NovoAmbiente.dc.html",
+    "AmbientesArquivados.dc.html",
+    "SalvandoAmbiente.dc.html",
+    "ExcluindoAmbiente.dc.html",
+    "AmbienteCriado.dc.html"
   ],
   "pages": [],
   "title": "Garden Manager — Telas do App"
