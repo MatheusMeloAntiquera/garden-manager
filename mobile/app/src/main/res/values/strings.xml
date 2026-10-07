@@ -119,6 +119,8 @@
         <item quantity="other">%d plantas neste ambiente</item>
     </plurals>
     <string name="environment_delete">Excluir ambiente</string>
+    <!-- Descrição do lápis no card, lida pelo leitor de tela. -->
+    <string name="environment_edit_named">Editar %1$s</string>
     <string name="environment_saving">Salvando…</string>
     <string name="environment_deleting">Excluindo…</string>
     <string name="validation_environment_name_required">Informe o nome do ambiente.</string>
@@ -134,4 +136,109 @@
         <item quantity="many">“%1$s” será excluído.&lt;br&gt;&lt;br&gt;As %2$d plantas dele &lt;b&gt;não serão apagadas&lt;/b&gt;: ficarão sem ambiente e continuam na aba Plantas.</item>
         <item quantity="other">“%1$s” será excluído.&lt;br&gt;&lt;br&gt;As %2$d plantas dele &lt;b&gt;não serão apagadas&lt;/b&gt;: ficarão sem ambiente e continuam na aba Plantas.</item>
     </plurals>
+
+    <!-- Conjunção para juntar dois itens: "2 agendamentos e 3 registros". -->
+    <string name="list_and">" e "</string>
+
+    <!-- Aba Plantas -->
+    <string name="plants_title">Plantas</string>
+    <string name="plants_new">Nova planta</string>
+    <string name="plants_search_label">Buscar planta</string>
+    <string name="plants_search_placeholder">Buscar por apelido ou espécie</string>
+    <string name="plants_filter_all">Todas</string>
+    <string name="plants_filter_archived">Arquivadas</string>
+    <string name="plants_load_error">Não foi possível carregar suas plantas.</string>
+    <string name="plants_in_environment_none">Nenhuma planta em %1$s</string>
+    <plurals name="plants_in_environment">
+        <item quantity="one">%1$d planta em %2$s</item>
+        <item quantity="many">%1$d plantas em %2$s</item>
+        <item quantity="other">%1$d plantas em %2$s</item>
+    </plurals>
+    <string name="plants_empty_title">Nenhuma planta ainda</string>
+    <string name="plants_empty_description">Cadastre sua primeira planta pelo botão “Nova planta”.</string>
+    <string name="plants_empty_search_title">Nenhuma planta encontrada</string>
+    <string name="plants_empty_search_description">Confira o texto da busca ou tente pelo nome popular da espécie.</string>
+    <string name="plants_empty_archived_title">Nenhuma planta arquivada</string>
+    <string name="plants_empty_archived_description">Plantas desativadas aparecem aqui. Abra uma delas para reativar.</string>
+    <string name="plants_empty_environment_title">Nenhuma planta neste ambiente</string>
+    <string name="plants_empty_environment_description">Use “Nova planta” para cadastrar uma já neste ambiente.</string>
+    <string name="plant_created">Planta criada</string>
+    <string name="plant_updated">Alterações salvas</string>
+    <string name="plant_deleted">Planta excluída</string>
+
+    <!-- Categorias de espécie -->
+    <string name="species_category_foliage">Folhagem</string>
+    <string name="species_category_succulent">Suculenta</string>
+    <string name="species_category_flower">Flor</string>
+    <string name="species_category_tree">Árvore</string>
+    <string name="species_category_herb">Erva</string>
+    <string name="species_category_vegetable">Hortaliça</string>
+    <string name="species_category_fruit">Frutífera</string>
+    <string name="species_category_grass">Grama</string>
+
+    <!-- Detalhe da planta -->
+    <string name="plant_edit">Editar planta</string>
+    <string name="plant_load_error">Não foi possível carregar a planta.</string>
+    <string name="plant_archived">Arquivada</string>
+    <string name="plant_schedules_title">Próximas manutenções</string>
+    <string name="plant_schedules_empty">Nenhuma manutenção agendada.</string>
+    <string name="plant_schedule_due">Prazo: %1$s</string>
+    <string name="plant_due_overdue">Atrasada</string>
+    <string name="plant_due_today">Hoje</string>
+    <string name="plant_due_tomorrow">Amanhã</string>
+    <plurals name="plant_due_in_days">
+        <item quantity="one">Em %d dia</item>
+        <item quantity="many">Em %d dias</item>
+        <item quantity="other">Em %d dias</item>
+    </plurals>
+    <string name="plant_history_title">Histórico</string>
+    <string name="plant_history_empty">Nenhuma manutenção registrada ainda.</string>
+
+    <!-- Formulário de planta -->
+    <string name="plant_form_new_title">Nova planta</string>
+    <string name="plant_form_edit_title">Editar planta</string>
+    <string name="plant_form_load_error">Não foi possível carregar os ambientes.</string>
+    <string name="field_plant_nickname">Apelido</string>
+    <string name="field_plant_nickname_placeholder">Ex.: Monstrinha</string>
+    <string name="field_plant_species">Espécie</string>
+    <string name="field_plant_species_placeholder">Buscar no catálogo</string>
+    <string name="field_plant_environment">Ambiente</string>
+    <string name="field_plant_environment_none">Sem ambiente</string>
+    <string name="field_plant_environment_archived">%1$s (arquivado)</string>
+    <string name="field_plant_notes_placeholder">Ex.: Perto da janela, luz indireta</string>
+    <string name="plant_active">Planta ativa</string>
+    <string name="plant_active_description">Desative para arquivar sem perder o histórico</string>
+    <string name="plant_delete">Excluir planta</string>
+    <string name="plant_saving">Salvando…</string>
+    <string name="plant_deleting">Excluindo…</string>
+    <string name="validation_plant_nickname_or_species">Informe um apelido ou uma espécie.</string>
+    <string name="validation_plant_nickname_too_long">O apelido pode ter no máximo 100 caracteres.</string>
+
+    <!-- Exclusão de planta. O <b> vai escapado e é interpretado por AnnotatedString.fromHtml. -->
+    <string name="plant_delete_title">Excluir planta?</string>
+    <string name="plant_delete_message">“%1$s” será excluída junto com &lt;b&gt;%2$s&lt;/b&gt;. Essa ação não pode ser desfeita.</string>
+    <string name="plant_delete_message_nothing">“%1$s” será excluída. Essa ação não pode ser desfeita.</string>
+    <!-- Só entram na frase com 1 ou mais, então o zero não precisa de texto próprio. -->
+    <plurals name="plant_delete_schedules">
+        <item quantity="one">%d agendamento</item>
+        <item quantity="many">%d agendamentos</item>
+        <item quantity="other">%d agendamentos</item>
+    </plurals>
+    <plurals name="plant_delete_logs">
+        <item quantity="one">%d registro do histórico</item>
+        <item quantity="many">%d registros do histórico</item>
+        <item quantity="other">%d registros do histórico</item>
+    </plurals>
+    <string name="plant_delete_note">Quer manter o histórico? Desative a planta em vez de excluir.</string>
+
+    <!-- Seletor de espécie -->
+    <string name="species_picker_title">Escolher espécie</string>
+    <string name="species_picker_search_label">Buscar espécie</string>
+    <string name="species_picker_search_placeholder">Nome popular ou científico</string>
+    <string name="species_picker_none">Sem espécie</string>
+    <string name="species_picker_none_description">A planta fica só com o apelido</string>
+    <string name="species_picker_load_error">Não foi possível carregar o catálogo.</string>
+    <string name="species_picker_empty_title">Nenhuma espécie encontrada</string>
+    <string name="species_picker_empty_description">Confira o texto da busca ou tente pelo nome científico.</string>
+    <string name="species_picker_selected">Selecionada</string>
 </resources>

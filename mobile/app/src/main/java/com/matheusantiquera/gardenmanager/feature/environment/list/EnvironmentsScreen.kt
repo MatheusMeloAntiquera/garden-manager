@@ -47,6 +47,7 @@ fun EnvironmentsScreen(
     formResult: EnvironmentFormResult?,
     onFormResultShown: () -> Unit,
     onEnvironmentClick: (Environment) -> Unit,
+    onEditEnvironment: (Environment) -> Unit,
     onNewEnvironment: () -> Unit,
     onShowArchived: () -> Unit,
     viewModel: EnvironmentsViewModel = hiltViewModel(),
@@ -66,6 +67,7 @@ fun EnvironmentsScreen(
         state = state,
         snackbarHostState = snackbarHostState,
         onEnvironmentClick = onEnvironmentClick,
+        onEditEnvironment = onEditEnvironment,
         onNewEnvironment = onNewEnvironment,
         onShowArchived = onShowArchived,
         onRetry = viewModel::load,
@@ -77,6 +79,7 @@ internal fun EnvironmentsContent(
     state: EnvironmentsUiState,
     snackbarHostState: SnackbarHostState,
     onEnvironmentClick: (Environment) -> Unit,
+    onEditEnvironment: (Environment) -> Unit,
     onNewEnvironment: () -> Unit,
     onShowArchived: () -> Unit,
     onRetry: () -> Unit,
@@ -128,7 +131,11 @@ internal fun EnvironmentsContent(
                     // Com ambientes ativos, o link fica no topo, antes do primeiro card.
                     item(key = "archived") { ShowArchivedLink(onClick = onShowArchived, alignment = Alignment.CenterEnd) }
                     items(list.environments, key = { it.id }) { environment ->
-                        EnvironmentCard(environment = environment, onClick = { onEnvironmentClick(environment) })
+                        EnvironmentCard(
+                            environment = environment,
+                            onClick = { onEnvironmentClick(environment) },
+                            onEdit = { onEditEnvironment(environment) },
+                        )
                     }
                 }
             }
@@ -180,6 +187,7 @@ private fun EnvironmentsContentPreview() {
             ),
             snackbarHostState = remember { SnackbarHostState() },
             onEnvironmentClick = {},
+            onEditEnvironment = {},
             onNewEnvironment = {},
             onShowArchived = {},
             onRetry = {},

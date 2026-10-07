@@ -7,12 +7,11 @@ import com.matheusantiquera.gardenmanager.R
 import com.matheusantiquera.gardenmanager.core.network.ApiResult
 import com.matheusantiquera.gardenmanager.core.network.toUiText
 import com.matheusantiquera.gardenmanager.core.ui.UiText
+import com.matheusantiquera.gardenmanager.core.ui.withMinimumDuration
 import com.matheusantiquera.gardenmanager.data.environment.EnvironmentRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -167,18 +166,7 @@ class EnvironmentFormViewModel @Inject constructor(
         /** Nome do argumento em [com.matheusantiquera.gardenmanager.navigation.EnvironmentFormRoute]. */
         const val ARG_ENVIRONMENT_ID = "id"
 
-        /**
-         * Tempo mínimo das janelas "Salvando…" e "Excluindo…". A API costuma responder em milissegundos,
-         * e sem esse mínimo a janela só pisca na tela.
-         */
-        const val MIN_PROGRESS_MILLIS = 2_000L
+        /** Tempo mínimo das janelas "Salvando…" e "Excluindo…" (ver [com.matheusantiquera.gardenmanager.core.ui.MIN_PROGRESS_MILLIS]). */
+        const val MIN_PROGRESS_MILLIS = com.matheusantiquera.gardenmanager.core.ui.MIN_PROGRESS_MILLIS
     }
-}
-
-/** Executa [block] e só devolve o resultado depois de passados pelo menos [millis], contados em paralelo. */
-private suspend fun <T> withMinimumDuration(millis: Long, block: suspend () -> T): T = coroutineScope {
-    val minimum = launch { delay(millis) }
-    val result = block()
-    minimum.join()
-    result
 }

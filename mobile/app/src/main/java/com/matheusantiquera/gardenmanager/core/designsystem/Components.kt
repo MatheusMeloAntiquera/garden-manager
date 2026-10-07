@@ -50,6 +50,7 @@ fun GardenTextField(
     enabled: Boolean = true,
     singleLine: Boolean = true,
     minLines: Int = 1,
+    readOnly: Boolean = false,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
@@ -64,6 +65,7 @@ fun GardenTextField(
                 .fillMaxWidth()
                 .semantics { contentDescription = label },
             enabled = enabled,
+            readOnly = readOnly,
             singleLine = singleLine,
             minLines = minLines,
             shape = RoundedCornerShape(14.dp),

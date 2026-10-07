@@ -33,6 +33,20 @@ data object ArchivedEnvironmentsRoute
 @Serializable
 data class EnvironmentFormRoute(val id: String? = null)
 
+@Serializable
+data class PlantDetailRoute(val id: String)
+
+/**
+ * Formulário de planta: com [id] edita, sem ele cria uma nova. [environmentId] preenche o ambiente
+ * ao criar, quando a lista estava filtrada por um.
+ */
+@Serializable
+data class PlantFormRoute(val id: String? = null, val environmentId: String? = null)
+
+/** Busca no catálogo de espécies. [selectedId] é a espécie atual da planta, marcada na lista. */
+@Serializable
+data class SpeciesPickerRoute(val selectedId: String? = null)
+
 /** Item da barra de navegação inferior. */
 enum class TopLevelDestination(
     val route: Any,
