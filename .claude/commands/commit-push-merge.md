@@ -9,6 +9,8 @@ Conduza o fluxo abaixo **uma etapa por vez**, no modo escolhido na etapa "Modo d
 - **Confirmar cada etapa:** antes de cada etapa, pergunte ao usuário com a ferramenta AskUserQuestion, com as opções "Sim" e "Não". Se a resposta for "Não" (ou qualquer coisa que não seja um "sim" claro), **pare imediatamente**: não execute mais nada e informe em uma linha até onde o fluxo chegou.
 - **Automático:** não faça as perguntas das etapas 1 a 4; execute cada etapa como se a resposta fosse "Sim".
 
+**Regra de exibição:** o texto escrito fora da ferramenta pode não chegar ao usuário. Tudo o que ele precisa ver para decidir (mensagem de commit, resumo das alterações, nome do branch) deve ir **dentro da própria pergunta do AskUserQuestion**, no campo `question` (e, quando for longo, repetido no `preview` da opção "Sim"). Nunca pergunte "com esta mensagem?" sem que a mensagem esteja na pergunta.
+
 Nos dois modos, as paradas de segurança continuam valendo: branch `master`, nada a fazer, push rejeitado, `pull --ff-only` falhando e conflito no merge sempre interrompem o fluxo, com a explicação do problema.
 
 Dica do usuário para a mensagem do commit (pode estar vazia): $ARGUMENTS
@@ -21,8 +23,8 @@ Dica do usuário para a mensagem do commit (pode estar vazia): $ARGUMENTS
 
 ## Modo de execução
 
-1. Se houver alterações não commitadas, mostre antes um resumo (`git status --short` e `git diff --stat`) e a mensagem de commit proposta (regras na etapa 1), para que o usuário decida já sabendo o que será commitado.
-2. Pergunte: **"Executar todas as etapas sem confirmar (commit, push do branch, merge e push do master, e exclusão do branch local e remoto)?"**, com as opções "Sim" (modo automático) e "Não" (confirmar cada etapa).
+1. Se houver alterações não commitadas, prepare um resumo (`git status --short` e `git diff --stat`) e a mensagem de commit proposta (regras na etapa 1), para que o usuário decida já sabendo o que será commitado.
+2. Pergunte, com o AskUserQuestion: **"Executar todas as etapas sem confirmar (commit, push do branch, merge e push do master, e exclusão do branch local e remoto)?"**, com as opções "Sim" (modo automático) e "Não" (confirmar cada etapa). Coloque no `question`, depois da pergunta, o branch, o resumo curto das alterações e a mensagem de commit proposta completa.
 
 ## 1. Commit
 
@@ -30,14 +32,14 @@ Dica do usuário para a mensagem do commit (pode estar vazia): $ARGUMENTS
    - padrão do repositório: Conventional Commits em português, com escopo (ex.: `feat(backend): adiciona cadastro de ambientes`), corpo explicando o quê e o porquê;
    - use a dica em `$ARGUMENTS`, se houver;
    - termine a mensagem com as linhas de atribuição exigidas pela sessão.
-2. Pergunte: **"Quer commitar estas alterações com esta mensagem?"**
+2. Pergunte, com o AskUserQuestion, **"Quer commitar estas alterações com esta mensagem?"** e, **no próprio texto da pergunta**, logo abaixo, a mensagem completa (título, corpo e linhas de atribuição) e o resumo do `git diff --cached --stat`. Repita a mensagem no `preview` da opção "Sim".
    - Não → pare.
    - Sim → `git add -A` e `git commit`. Confira com `git log --oneline -1`.
 3. Se não houver alterações pendentes, mas o branch tiver commits ainda não mesclados, diga isso e pule para a etapa 2 (sem perguntar sobre commit).
 
 ## 2. Push do branch
 
-1. Pergunte: **"Quer fazer o push do branch `<branch>` para o origin?"**
+1. Pergunte: **"Quer fazer o push do branch `<branch>` para o origin?"** (inclua na pergunta os commits que serão enviados, de `git log --oneline origin/master..HEAD`)
    - Não → pare.
    - Sim → `git push -u origin <branch>`. Se o push for rejeitado, mostre o erro e pare (nunca use `--force`).
 
