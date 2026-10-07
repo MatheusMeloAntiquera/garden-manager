@@ -82,7 +82,8 @@ const scheduleListFilter = `
 		OR ($4 = 'overdue' AND m.due_at < now())
 		OR ($4 = 'pending' AND m.due_at >= now()))
 	AND ($5::timestamptz IS NULL OR m.due_at >= $5)
-	AND ($6::timestamptz IS NULL OR m.due_at <= $6)`
+	AND ($6::timestamptz IS NULL OR m.due_at <= $6)
+	AND ($7::bool IS NULL OR EXISTS (SELECT 1 FROM plants p WHERE p.id = m.plant_id AND p.active = $7))`
 
 func (r *postgresScheduleRepository) List(ctx context.Context, userID uuid.UUID, filter ScheduleFilter, limit, offset int) ([]domain.MaintenanceSchedule, int, error) {
 	var status *string
@@ -90,7 +91,7 @@ func (r *postgresScheduleRepository) List(ctx context.Context, userID uuid.UUID,
 		s := string(*filter.Status)
 		status = &s
 	}
-	args := []any{userID, filter.PlantID, filter.TypeID, status, filter.DueFrom, filter.DueTo}
+	args := []any{userID, filter.PlantID, filter.TypeID, status, filter.DueFrom, filter.DueTo, filter.PlantActive}
 
 	var total int
 	if err := r.pool.QueryRow(ctx, `SELECT count(*) FROM maintenance_schedules m`+scheduleListFilter, args...).Scan(&total); err != nil {
@@ -101,7 +102,7 @@ func (r *postgresScheduleRepository) List(ctx context.Context, userID uuid.UUID,
 		SELECT ` + scheduleColumns + `
 		FROM maintenance_schedules m ` + scheduleJoins + scheduleListFilter + `
 		ORDER BY m.due_at, m.created_at
-		LIMIT $7 OFFSET $8`
+		LIMIT $8 OFFSET $9`
 
 	rows, err := r.pool.Query(ctx, query, append(args, limit, offset)...)
 	if err != nil {

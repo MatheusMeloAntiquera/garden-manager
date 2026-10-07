@@ -48,6 +48,8 @@ type ListSchedulesInput struct {
 	Status  *domain.MaintenanceStatus
 	DueFrom *datetime.LocalDateTime
 	DueTo   *datetime.LocalDateTime
+	// PlantActive restringe a plantas ativas (true) ou arquivadas (false).
+	PlantActive *bool
 }
 
 // ListLogsInput reúne os parâmetros de GET /maintenance-logs.
@@ -57,6 +59,8 @@ type ListLogsInput struct {
 	TypeID        *uuid.UUID
 	PerformedFrom *datetime.LocalDateTime
 	PerformedTo   *datetime.LocalDateTime
+	// PlantActive restringe a plantas ativas (true) ou arquivadas (false).
+	PlantActive *bool
 }
 
 // TypeResponse é a representação pública de um tipo de manutenção.

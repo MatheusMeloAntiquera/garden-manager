@@ -325,7 +325,7 @@ func decodeBody(w http.ResponseWriter, r *http.Request, v any) bool {
 	return false
 }
 
-// parseListSchedulesInput lê page, page_size, plant_id, type_id, status,
+// parseListSchedulesInput lê page, page_size, plant_id, type_id, status, plant_active,
 // due_from e due_to da query string.
 func parseListSchedulesInput(r *http.Request) (ListSchedulesInput, error) {
 	params, err := pagination.Parse(r)
@@ -355,6 +355,10 @@ func parseListSchedulesInput(r *http.Request) (ListSchedulesInput, error) {
 	if input.DueFrom, err = parseDateTimeParam(query.Get("due_from"), "due_from"); err != nil {
 		return ListSchedulesInput{}, err
 	}
+	if input.PlantActive, err = parseBoolParam(query.Get("plant_active"), "plant_active"); err != nil {
+		return ListSchedulesInput{}, err
+	}
+
 	if input.DueTo, err = parseDateTimeParam(query.Get("due_to"), "due_to"); err != nil {
 		return ListSchedulesInput{}, err
 	}
@@ -362,7 +366,7 @@ func parseListSchedulesInput(r *http.Request) (ListSchedulesInput, error) {
 	return input, nil
 }
 
-// parseListLogsInput lê page, page_size, plant_id, type_id, performed_from e
+// parseListLogsInput lê page, page_size, plant_id, type_id, plant_active, performed_from e
 // performed_to da query string.
 func parseListLogsInput(r *http.Request) (ListLogsInput, error) {
 	params, err := pagination.Parse(r)
@@ -381,6 +385,10 @@ func parseListLogsInput(r *http.Request) (ListLogsInput, error) {
 	if input.PerformedFrom, err = parseDateTimeParam(query.Get("performed_from"), "performed_from"); err != nil {
 		return ListLogsInput{}, err
 	}
+	if input.PlantActive, err = parseBoolParam(query.Get("plant_active"), "plant_active"); err != nil {
+		return ListLogsInput{}, err
+	}
+
 	if input.PerformedTo, err = parseDateTimeParam(query.Get("performed_to"), "performed_to"); err != nil {
 		return ListLogsInput{}, err
 	}
@@ -398,6 +406,21 @@ func parseUUIDParam(raw, name string) (*uuid.UUID, error) {
 		return nil, errors.New("parâmetro " + name + " inválido")
 	}
 	return &id, nil
+}
+
+// parseBoolParam converte um parâmetro opcional da query string em bool (true ou false).
+func parseBoolParam(raw, name string) (*bool, error) {
+	switch raw {
+	case "":
+		return nil, nil
+	case "true":
+		v := true
+		return &v, nil
+	case "false":
+		v := false
+		return &v, nil
+	}
+	return nil, errors.New("parâmetro " + name + " inválido (true ou false)")
 }
 
 // parseDateTimeParam converte um parâmetro opcional da query string no
@@ -424,7 +447,7 @@ func writeServiceError(w http.ResponseWriter, err error) {
 	switch {
 	case errors.Is(err, ErrScheduleNotFound), errors.Is(err, ErrLogNotFound), errors.Is(err, plant.ErrPlantNotFound):
 		httpx.WriteError(w, http.StatusNotFound, err.Error(), nil)
-	case errors.Is(err, ErrInvalidPlant), errors.Is(err, ErrInvalidType), errors.Is(err, ErrInvalidSchedule),
+	case errors.Is(err, ErrInvalidPlant), errors.Is(err, ErrArchivedPlant), errors.Is(err, ErrInvalidType), errors.Is(err, ErrInvalidSchedule),
 		errors.Is(err, ErrScheduleMismatch), errors.Is(err, ErrPerformedAtInFuture):
 		httpx.WriteError(w, http.StatusUnprocessableEntity, err.Error(), nil)
 	default:

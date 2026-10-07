@@ -117,6 +117,7 @@ func (f fakeSchedules) List(_ context.Context, userID uuid.UUID, filter Schedule
 		case filter.Status != nil && m.Status(fixedNow) != *filter.Status:
 		case filter.DueFrom != nil && m.DueAt.Before(*filter.DueFrom):
 		case filter.DueTo != nil && m.DueAt.After(*filter.DueTo):
+		case filter.PlantActive != nil && f.plants.byID[m.PlantID].Active != *filter.PlantActive:
 		default:
 			matched = append(matched, m)
 		}
@@ -206,6 +207,7 @@ func (f fakeLogs) List(_ context.Context, userID uuid.UUID, filter LogFilter, li
 		case filter.TypeID != nil && l.TypeID != *filter.TypeID:
 		case filter.PerformedFrom != nil && l.PerformedAt.Before(*filter.PerformedFrom):
 		case filter.PerformedTo != nil && l.PerformedAt.After(*filter.PerformedTo):
+		case filter.PlantActive != nil && f.plants.byID[l.PlantID].Active != *filter.PlantActive:
 		default:
 			matched = append(matched, f.hydrateLog(l))
 		}
@@ -649,6 +651,108 @@ func TestListSchedulesFiltersAndPagination(t *testing.T) {
 				t.Errorf("obteve %v, esperava %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestArchivedPlantRejectsNewMaintenances(t *testing.T) {
+	env := newTestEnv(t)
+	ctx := context.Background()
+	owner := uuid.New()
+	plantID := env.addPlant(owner, "Samambaia")
+
+	schedule := createSchedule(t, env.svc, owner, ScheduleInput{PlantID: &plantID, TypeID: &env.rega, DueAt: at(time.Hour)})
+	log := createLog(t, env.svc, owner, CreateLogInput{PlantID: &plantID, TypeID: &env.rega, PerformedAt: at(-time.Hour)})
+
+	// A planta é arquivada depois de ter agendamento e histórico.
+	p := env.plants.byID[plantID]
+	p.Active = false
+	env.plants.byID[plantID] = p
+
+	if _, err := env.svc.CreateSchedule(ctx, owner, ScheduleInput{PlantID: &plantID, TypeID: &env.rega, DueAt: at(time.Hour)}); !errors.Is(err, ErrArchivedPlant) {
+		t.Errorf("agendar em planta arquivada: esperava ErrArchivedPlant, obteve: %v", err)
+	}
+	if _, err := env.svc.CreateLog(ctx, owner, CreateLogInput{PlantID: &plantID, TypeID: &env.rega, PerformedAt: at(-time.Minute)}); !errors.Is(err, ErrArchivedPlant) {
+		t.Errorf("registrar em planta arquivada: esperava ErrArchivedPlant, obteve: %v", err)
+	}
+	if _, err := env.svc.CreateLog(ctx, owner, CreateLogInput{ScheduleID: &schedule.ID, PerformedAt: at(-time.Minute)}); !errors.Is(err, ErrArchivedPlant) {
+		t.Errorf("concluir agendamento de planta arquivada: esperava ErrArchivedPlant, obteve: %v", err)
+	}
+	if _, err := env.svc.GetSchedule(ctx, owner, schedule.ID); err != nil {
+		t.Errorf("o agendamento recusado deveria continuar existindo, obteve: %v", err)
+	}
+
+	// Editar e excluir o que a planta já tinha continua permitido.
+	if _, err := env.svc.UpdateSchedule(ctx, owner, schedule.ID, ScheduleInput{PlantID: &plantID, TypeID: &env.poda, DueAt: at(2 * time.Hour)}); err != nil {
+		t.Errorf("editar agendamento de planta arquivada: obteve erro %v", err)
+	}
+	if _, err := env.svc.UpdateLog(ctx, owner, log.ID, UpdateLogInput{PlantID: &plantID, TypeID: &env.poda, PerformedAt: at(-2 * time.Hour)}); err != nil {
+		t.Errorf("editar execução de planta arquivada: obteve erro %v", err)
+	}
+	if err := env.svc.DeleteSchedule(ctx, owner, schedule.ID); err != nil {
+		t.Errorf("excluir agendamento de planta arquivada: obteve erro %v", err)
+	}
+	if err := env.svc.DeleteLog(ctx, owner, log.ID); err != nil {
+		t.Errorf("excluir execução de planta arquivada: obteve erro %v", err)
+	}
+}
+
+func TestListFiltersByPlantActive(t *testing.T) {
+	env := newTestEnv(t)
+	ctx := context.Background()
+	owner := uuid.New()
+	active := env.addPlant(owner, "Ativa")
+	archived := env.addPlant(owner, "Arquivada")
+
+	activeSchedule := createSchedule(t, env.svc, owner, ScheduleInput{PlantID: &active, TypeID: &env.rega, DueAt: at(-time.Hour)})
+	archivedSchedule := createSchedule(t, env.svc, owner, ScheduleInput{PlantID: &archived, TypeID: &env.rega, DueAt: at(-2 * time.Hour)})
+	activeLog := createLog(t, env.svc, owner, CreateLogInput{PlantID: &active, TypeID: &env.rega, PerformedAt: at(-time.Hour)})
+	archivedLog := createLog(t, env.svc, owner, CreateLogInput{PlantID: &archived, TypeID: &env.rega, PerformedAt: at(-2 * time.Hour)})
+
+	// A planta é arquivada depois de ter agendamento e histórico.
+	p := env.plants.byID[archived]
+	p.Active = false
+	env.plants.byID[archived] = p
+
+	scheduleIDs := func(input ListSchedulesInput) []uuid.UUID {
+		list, err := env.svc.ListSchedules(ctx, owner, input)
+		if err != nil {
+			t.Fatalf("ListSchedules retornou erro: %v", err)
+		}
+		var ids []uuid.UUID
+		for _, s := range list.Data {
+			ids = append(ids, s.ID)
+		}
+		return ids
+	}
+	logIDs := func(input ListLogsInput) []uuid.UUID {
+		list, err := env.svc.ListLogs(ctx, owner, input)
+		if err != nil {
+			t.Fatalf("ListLogs retornou erro: %v", err)
+		}
+		var ids []uuid.UUID
+		for _, l := range list.Data {
+			ids = append(ids, l.ID)
+		}
+		return ids
+	}
+
+	if got := scheduleIDs(ListSchedulesInput{}); !slices.Equal(got, []uuid.UUID{archivedSchedule.ID, activeSchedule.ID}) {
+		t.Errorf("sem plant_active: esperava todos, obteve %v", got)
+	}
+	if got := scheduleIDs(ListSchedulesInput{PlantActive: ptr(true)}); !slices.Equal(got, []uuid.UUID{activeSchedule.ID}) {
+		t.Errorf("plant_active=true: esperava só a planta ativa, obteve %v", got)
+	}
+	if got := scheduleIDs(ListSchedulesInput{PlantActive: ptr(false)}); !slices.Equal(got, []uuid.UUID{archivedSchedule.ID}) {
+		t.Errorf("plant_active=false: esperava só a planta arquivada, obteve %v", got)
+	}
+	if got := logIDs(ListLogsInput{}); len(got) != 2 {
+		t.Errorf("sem plant_active: esperava as 2 execuções, obteve %v", got)
+	}
+	if got := logIDs(ListLogsInput{PlantActive: ptr(true)}); !slices.Equal(got, []uuid.UUID{activeLog.ID}) {
+		t.Errorf("plant_active=true: esperava só a planta ativa, obteve %v", got)
+	}
+	if got := logIDs(ListLogsInput{PlantActive: ptr(false)}); !slices.Equal(got, []uuid.UUID{archivedLog.ID}) {
+		t.Errorf("plant_active=false: esperava só a planta arquivada, obteve %v", got)
 	}
 }
 

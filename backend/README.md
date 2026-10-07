@@ -252,14 +252,14 @@ Catálogo **somente leitura**, carregado pela migration `000009_seed_maintenance
 
 | Campo | Regras |
 |---|---|
-| `plant_id` | obrigatório; precisa ser uma planta do próprio usuário |
+| `plant_id` | obrigatório; precisa ser uma planta do próprio usuário e, ao criar, **ativa** (planta arquivada responde `422`) |
 | `type_id` | obrigatório; precisa existir em `/maintenance-types` |
 | `due_at` | obrigatório; prazo para execução (`AAAA-MM-DD HH:mm:ss`) |
 | `notes` | opcional, até 2000 caracteres; em branco vira `null` |
 
 A resposta traz `status`, calculado na hora da consulta: `overdue` se o prazo já venceu, senão `pending`.
 
-Parâmetros de query da listagem (todos opcionais): `plant_id`, `type_id`, `status` (`pending` ou `overdue`), `due_from` e `due_to` (intervalo do prazo, inclusive), `page` e `page_size`.
+Parâmetros de query da listagem (todos opcionais): `plant_id`, `type_id`, `status` (`pending` ou `overdue`), `plant_active` (`true` só de plantas ativas, `false` só de arquivadas; omitido traz as duas), `due_from` e `due_to` (intervalo do prazo, inclusive), `page` e `page_size`.
 
 ```json
 { "data": [ { "id": "…", "plant": { "id": "…", "display_name": "Samambaia da vovó" }, "type": { "id": "…", "name": "Rega" }, "due_at": "2026-10-05 08:00:00", "notes": null, "status": "pending", "created_at": "…", "updated_at": "…" } ], "page": 1, "page_size": 20, "total": 1 }
@@ -287,9 +287,11 @@ A resposta traz `created_from_schedule` (**criado por agendamento**), definido p
 
 O registro da execução e a exclusão do agendamento acontecem numa única transação. Informar um agendamento que já foi executado (e, portanto, excluído) responde `422`.
 
-Erros específicos (`422`): planta, tipo ou agendamento inexistentes (ou de outro usuário), planta/tipo diferentes dos do agendamento, ou `performed_at` no futuro.
+Erros específicos (`422`): planta, tipo ou agendamento inexistentes (ou de outro usuário), planta/tipo diferentes dos do agendamento, planta arquivada (ao criar um agendamento ou uma execução, inclusive concluindo um agendamento) ou `performed_at` no futuro.
 
-Parâmetros de query da listagem (todos opcionais): `plant_id`, `type_id`, `performed_from` e `performed_to` (intervalo da execução, inclusive), `page` e `page_size`.
+Planta arquivada não recebe agendamentos nem execuções novas, mas o que ela já tinha continua podendo ser listado, editado e excluído.
+
+Parâmetros de query da listagem (todos opcionais): `plant_id`, `type_id`, `plant_active` (`true` só de plantas ativas, `false` só de arquivadas; omitido traz as duas), `performed_from` e `performed_to` (intervalo da execução, inclusive), `page` e `page_size`.
 
 ```json
 { "data": [ { "id": "…", "plant": { "id": "…", "display_name": "Samambaia da vovó" }, "type": { "id": "…", "name": "Rega" }, "created_from_schedule": true, "performed_at": "2026-10-05 08:30:00", "notes": null, "created_at": "…", "updated_at": "…" } ], "page": 1, "page_size": 20, "total": 1 }
@@ -364,6 +366,9 @@ curl -X POST http://localhost:8080/api/v1/maintenance-schedules   -H "Authorizat
 
 # Listar agendamentos atrasados
 curl "http://localhost:8080/api/v1/maintenance-schedules?status=overdue"   -H "Authorization: Bearer <access_token>"
+
+# Listar só os agendamentos de plantas ativas (é o que a aba Agenda do app usa)
+curl "http://localhost:8080/api/v1/maintenance-schedules?plant_active=true"   -H "Authorization: Bearer <access_token>"
 
 # Editar agendamento
 curl -X PUT http://localhost:8080/api/v1/maintenance-schedules/<id>   -H "Authorization: Bearer <access_token>"   -H "Content-Type: application/json"   -d '{"plant_id":"<plant_id>","type_id":"<type_id>","due_at":"2026-10-06 08:00:00"}'

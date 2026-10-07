@@ -19,6 +19,10 @@ var (
 	// outro usuário.
 	ErrInvalidPlant = errors.New("planta informada não encontrada")
 
+	// ErrArchivedPlant indica que a planta informada está arquivada (inativa) e
+	// não aceita agendamentos nem execuções novas.
+	ErrArchivedPlant = errors.New("planta arquivada não aceita novas manutenções")
+
 	// ErrInvalidType indica que o tipo de manutenção informado não existe.
 	ErrInvalidType = errors.New("tipo de manutenção informado não encontrado")
 

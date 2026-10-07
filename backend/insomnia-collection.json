@@ -573,7 +573,7 @@
       "_type": "request",
       "parentId": "fld_maintenances",
       "name": "List Maintenance Schedules",
-      "description": "Lista os agendamentos do usuário, ordenados pelo prazo. Parâmetros opcionais: plant_id, type_id, status (pending, overdue), due_from, due_to, page e page_size.",
+      "description": "Lista os agendamentos do usuário, ordenados pelo prazo. Parâmetros opcionais: plant_id, type_id, status (pending, overdue), plant_active (true, false), due_from, due_to, page e page_size.",
       "method": "GET",
       "url": "{{ _.base_url }}/api/v1/maintenance-schedules",
       "body": {},
@@ -586,6 +586,7 @@
         { "name": "plant_id", "value": "{{ _.plant_id }}", "disabled": true },
         { "name": "type_id", "value": "{{ _.maintenance_type_id }}", "disabled": true },
         { "name": "status", "value": "pending", "disabled": true },
+        { "name": "plant_active", "value": "true", "disabled": true },
         { "name": "due_from", "value": "2026-10-01 00:00:00", "disabled": true },
         { "name": "due_to", "value": "2026-10-31 23:59:59", "disabled": true }
       ],
@@ -733,7 +734,7 @@
       "_type": "request",
       "parentId": "fld_maintenances",
       "name": "List Maintenance Logs",
-      "description": "Lista as execuções do usuário, da mais recente para a mais antiga. Parâmetros opcionais: plant_id, type_id, performed_from, performed_to, page e page_size.",
+      "description": "Lista as execuções do usuário, da mais recente para a mais antiga. Parâmetros opcionais: plant_id, type_id, plant_active (true, false), performed_from, performed_to, page e page_size.",
       "method": "GET",
       "url": "{{ _.base_url }}/api/v1/maintenance-logs",
       "body": {},
@@ -745,6 +746,7 @@
         { "name": "page_size", "value": "20" },
         { "name": "plant_id", "value": "{{ _.plant_id }}", "disabled": true },
         { "name": "type_id", "value": "{{ _.maintenance_type_id }}", "disabled": true },
+        { "name": "plant_active", "value": "true", "disabled": true },
         { "name": "performed_from", "value": "2026-10-01 00:00:00", "disabled": true },
         { "name": "performed_to", "value": "2026-10-31 23:59:59", "disabled": true }
       ],
