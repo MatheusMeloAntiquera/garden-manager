@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Registrar manutenção</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2E5E45}a:hover{color:#1F4331}
+input::placeholder, textarea::placeholder{color:#6B776E}
+.filled::placeholder{color:#18211B; opacity: 1}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F6F1; color: #18211B; font-family: 'Manrope', sans-serif; display: flex; flex-direction: column; overflow: hidden">
+<header style="display: flex; align-items: center; gap: 4px; padding: 16px 8px 8px">
+<a href="Agenda.dc.html" aria-label="Fechar" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: #18211B">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+</a>
+<h1 style="margin: 0; font-size: 20px; font-weight: 800">Registrar manutenção</h1>
+</header>
+
+<form style="flex-grow: 1; padding: 8px 20px 24px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #E7EDE4; border-radius: 16px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2E5E45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path></svg>
+<div style="display: flex; flex-direction: column"><div style="font-size: 12px; color: #4E5B52">Planta</div><div style="font-size: 15px; font-weight: 700">Monstrinha</div></div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="tipo" style="font-size: 13px; font-weight: 700; color: #4E5B52">Tipo de manutenção</label>
+<div style="display: flex; align-items: center; height: 54px; box-sizing: border-box; padding: 0 12px 0 16px; background: #FFFFFF; border: 1px solid #C3CCC2; border-radius: 14px">
+<input id="tipo" class="filled" type="text" placeholder="Rega" style="flex-grow: 1; border: 0; outline: none; background: transparent; font-family: inherit; font-size: 16px; color: #18211B">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4E5B52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+</div>
+<div style="font-size: 12px; color: #4E5B52; padding: 0 2px">Ao concluir um agendamento, o tipo vem dele e não muda.</div>
+</div>
+
+<div style="display: flex; gap: 12px">
+<div style="flex: 3; display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 13px; font-weight: 700; color: #4E5B52">Data</div>
+<div style="display: flex; align-items: center; gap: 10px; min-height: 56px; box-sizing: border-box; padding: 8px 16px; background: #FFFFFF; border: 1px solid #C3CCC2; border-radius: 14px"><div style="flex-grow: 1; font-size: 16px">07/10/2026</div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4E5B52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg></div>
+</div>
+<div style="flex: 2; display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 13px; font-weight: 700; color: #4E5B52">Hora</div>
+<div style="display: flex; align-items: center; min-height: 56px; box-sizing: border-box; padding: 8px 16px; background: #FFFFFF; border: 1px solid #C3CCC2; border-radius: 14px"><div style="font-size: 16px">13:20</div></div>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="obs" style="font-size: 13px; font-weight: 700; color: #4E5B52">Observações</label>
+<textarea id="obs" class="filled" rows="3" placeholder="Ex.: Meio litro de água" style="box-sizing: border-box; padding: 14px 16px; background: #FFFFFF; border: 1px solid #C3CCC2; border-radius: 14px; font-family: inherit; font-size: 16px; line-height: 1.45; color: #18211B; outline: none; resize: none"></textarea>
+</div>
+
+<div style="margin-top: auto; display: flex; gap: 12px">
+<a href="Agenda.dc.html" style="flex: 1; height: 54px; box-sizing: border-box; border-radius: 27px; border: 1px solid #C3CCC2; color: #2E5E45; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; text-decoration: none">Cancelar</a>
+<a href="SalvandoRegistro.dc.html" style="flex: 1; height: 54px; border-radius: 27px; background: #2E5E45; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; text-decoration: none">Salvar</a>
+</div>
+</form>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

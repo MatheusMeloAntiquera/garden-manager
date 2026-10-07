@@ -2,6 +2,7 @@ package com.matheusantiquera.gardenmanager.feature.plant.detail
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,16 +10,20 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -28,7 +33,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -46,6 +50,7 @@ import com.matheusantiquera.gardenmanager.core.designsystem.GardenTheme
 import com.matheusantiquera.gardenmanager.core.designsystem.InfoChip
 import com.matheusantiquera.gardenmanager.core.designsystem.LoadErrorState
 import com.matheusantiquera.gardenmanager.core.designsystem.LoadingState
+import com.matheusantiquera.gardenmanager.core.ui.ShowOneShotMessage
 import com.matheusantiquera.gardenmanager.core.ui.asString
 import com.matheusantiquera.gardenmanager.data.maintenance.MaintenanceLog
 import com.matheusantiquera.gardenmanager.data.maintenance.MaintenanceSchedule
@@ -55,38 +60,81 @@ import com.matheusantiquera.gardenmanager.data.plant.PlantEnvironment
 import com.matheusantiquera.gardenmanager.data.plant.PlantSpecies
 import com.matheusantiquera.gardenmanager.data.species.Species
 import com.matheusantiquera.gardenmanager.data.species.SpeciesCategory
+import com.matheusantiquera.gardenmanager.feature.maintenance.DueStatus
+import com.matheusantiquera.gardenmanager.feature.maintenance.MaintenanceActionsHost
+import com.matheusantiquera.gardenmanager.feature.maintenance.MaintenanceResult
+import com.matheusantiquera.gardenmanager.feature.maintenance.MaintenanceTypeIcon
+import com.matheusantiquera.gardenmanager.feature.maintenance.ShowMaintenanceResult
+import com.matheusantiquera.gardenmanager.feature.maintenance.dueStatus
+import com.matheusantiquera.gardenmanager.feature.maintenance.formatDueAt
+import com.matheusantiquera.gardenmanager.feature.maintenance.formatPerformedAt
+import com.matheusantiquera.gardenmanager.feature.maintenance.maintenanceTypeVisual
 import com.matheusantiquera.gardenmanager.feature.plant.PlantFormResult
 import com.matheusantiquera.gardenmanager.feature.plant.ShowPlantFormResult
 import java.time.LocalDateTime
 
 /**
- * Detalhe da planta. [formResult] é o que o formulário de edição deixou ao voltar; a tela mostra a
- * mensagem e chama [onFormResultShown] para limpá-lo. Registrar e Agendar entram com a Agenda.
+ * Detalhe da planta. [formResult] é o que o formulário de edição deixou ao voltar e [maintenanceResult]
+ * o de um formulário de manutenção; a tela mostra a mensagem e chama [onFormResultShown] ou
+ * [onMaintenanceResultShown] para limpá-lo. Registrar e Agendar abrem os formulários de manutenção; tocar
+ * num agendamento abre as ações dele e tocar numa execução abre o detalhe ([onOpenLog]). Numa planta
+ * arquivada não há Registrar nem Agendar, os agendamentos não abrem ações e o detalhe da execução é só
+ * para leitura.
  */
 @Composable
 fun PlantDetailScreen(
     formResult: PlantFormResult?,
     onFormResultShown: () -> Unit,
+    maintenanceResult: MaintenanceResult?,
+    onMaintenanceResultShown: () -> Unit,
     onBack: () -> Unit,
     onEdit: () -> Unit,
+    onRegister: () -> Unit,
+    onSchedule: () -> Unit,
+    onCompleteSchedule: (MaintenanceSchedule) -> Unit,
+    onEditSchedule: (MaintenanceSchedule) -> Unit,
+    onOpenLog: (log: MaintenanceLog, readOnly: Boolean) -> Unit,
     viewModel: PlantDetailViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val actions by viewModel.actions.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Recarrega ao voltar do formulário de edição.
+    // Recarrega ao voltar dos formulários.
     LifecycleResumeEffect(viewModel) {
         viewModel.load()
         onPauseOrDispose {}
     }
 
     ShowPlantFormResult(result = formResult, onShown = onFormResultShown, snackbarHostState = snackbarHostState)
+    ShowMaintenanceResult(result = maintenanceResult, onShown = onMaintenanceResultShown, snackbarHostState = snackbarHostState)
+    ShowMaintenanceResult(result = actions.deleted, onShown = viewModel.actions::clearDeleted, snackbarHostState = snackbarHostState)
+    ShowOneShotMessage(message = actions.error?.asString(), onShown = viewModel.actions::clearError, snackbarHostState = snackbarHostState)
 
     // Sem a barra inferior, a tela cuida da barra de navegação do sistema.
     Box(modifier = Modifier.fillMaxSize().navigationBarsPadding()) {
-        PlantDetailContent(state = state, onBack = onBack, onEdit = onEdit, onRetry = viewModel::load)
+        PlantDetailContent(
+            state = state,
+            onBack = onBack,
+            onEdit = onEdit,
+            onRetry = viewModel::load,
+            onRegister = onRegister,
+            onSchedule = onSchedule,
+            onScheduleClick = viewModel::onScheduleClick,
+            onLogClick = { log -> onOpenLog(log, (state as? PlantDetailUiState.Loaded)?.plant?.active == false) },
+        )
         SnackbarHost(hostState = snackbarHostState, modifier = Modifier.align(Alignment.BottomCenter))
     }
+
+    MaintenanceActionsHost(
+        state = actions,
+        onDismissSheet = viewModel.actions::dismissSheet,
+        onComplete = onCompleteSchedule,
+        onEditSchedule = onEditSchedule,
+        onAskDelete = viewModel.actions::askDelete,
+        onDismissDelete = viewModel.actions::dismissDelete,
+        onConfirmDelete = viewModel.actions::confirmDelete,
+    )
 }
 
 @Composable
@@ -95,6 +143,10 @@ internal fun PlantDetailContent(
     onBack: () -> Unit,
     onEdit: () -> Unit,
     onRetry: () -> Unit,
+    onRegister: () -> Unit,
+    onSchedule: () -> Unit,
+    onScheduleClick: (MaintenanceSchedule) -> Unit,
+    onLogClick: (MaintenanceLog) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -130,13 +182,25 @@ internal fun PlantDetailContent(
                 onRetry = onRetry,
                 modifier = Modifier.fillMaxWidth(),
             )
-            is PlantDetailUiState.Loaded -> Details(state)
+            is PlantDetailUiState.Loaded -> Details(
+                state = state,
+                onRegister = onRegister,
+                onSchedule = onSchedule,
+                onScheduleClick = onScheduleClick,
+                onLogClick = onLogClick,
+            )
         }
     }
 }
 
 @Composable
-private fun Details(state: PlantDetailUiState.Loaded) {
+private fun Details(
+    state: PlantDetailUiState.Loaded,
+    onRegister: () -> Unit,
+    onSchedule: () -> Unit,
+    onScheduleClick: (MaintenanceSchedule) -> Unit,
+    onLogClick: (MaintenanceLog) -> Unit,
+) {
     val plant = state.plant
     Column(
         modifier = Modifier
@@ -172,8 +236,31 @@ private fun Details(state: PlantDetailUiState.Loaded) {
             }
         }
 
-        SchedulesSection(schedules = state.maintenance.schedules)
-        HistorySection(logs = state.maintenance.logs)
+        // Planta arquivada não recebe manutenção nova nem mexe nas que já tem: só leitura.
+        if (plant.active) MaintenanceButtons(onRegister = onRegister, onSchedule = onSchedule)
+
+        SchedulesSection(schedules = state.maintenance.schedules, onScheduleClick = onScheduleClick.takeIf { plant.active })
+        HistorySection(logs = state.maintenance.logs, onLogClick = onLogClick)
+    }
+}
+
+/** Registrar (o que foi feito agora) e Agendar (o que fazer depois), como no canvas. */
+@Composable
+private fun MaintenanceButtons(onRegister: () -> Unit, onSchedule: () -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Button(onClick = onRegister, modifier = Modifier.weight(1f).height(48.dp), shape = CircleShape) {
+            Icon(painter = painterResource(R.drawable.ic_check), contentDescription = null, modifier = Modifier.size(18.dp))
+            Text(text = stringResource(R.string.plant_action_register), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelLarge)
+        }
+        OutlinedButton(
+            onClick = onSchedule,
+            modifier = Modifier.weight(1f).height(48.dp),
+            shape = CircleShape,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        ) {
+            Icon(painter = painterResource(R.drawable.ic_calendar), contentDescription = null, modifier = Modifier.size(18.dp))
+            Text(text = stringResource(R.string.plant_action_schedule), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelLarge)
+        }
     }
 }
 
@@ -238,18 +325,19 @@ private fun EmptySectionText(text: String) {
 }
 
 @Composable
-private fun SchedulesSection(schedules: List<MaintenanceSchedule>) {
+private fun SchedulesSection(schedules: List<MaintenanceSchedule>, onScheduleClick: ((MaintenanceSchedule) -> Unit)?) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         SectionTitle(stringResource(R.string.plant_schedules_title))
         if (schedules.isEmpty()) EmptySectionText(stringResource(R.string.plant_schedules_empty))
-        schedules.forEach { ScheduleRow(it) }
+        schedules.forEach { schedule -> ScheduleRow(schedule, onClick = onScheduleClick?.let { click -> { click(schedule) } }) }
     }
 }
 
 @Composable
-private fun ScheduleRow(schedule: MaintenanceSchedule) {
-    val visual = maintenanceTypeVisual(schedule.typeName)
+private fun ScheduleRow(schedule: MaintenanceSchedule, onClick: (() -> Unit)?) {
     Surface(
+        onClick = onClick ?: {},
+        enabled = onClick != null,
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surface,
@@ -260,11 +348,7 @@ private fun ScheduleRow(schedule: MaintenanceSchedule) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Surface(modifier = Modifier.size(40.dp), shape = RoundedCornerShape(12.dp), color = visual.container, contentColor = visual.content) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(painter = painterResource(visual.icon), contentDescription = null, modifier = Modifier.size(20.dp))
-                }
-            }
+            MaintenanceTypeIcon(typeName = schedule.typeName)
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(text = schedule.typeName, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
                 Text(
@@ -296,7 +380,7 @@ private fun DueStatusChip(status: DueStatus) {
 }
 
 @Composable
-private fun HistorySection(logs: List<MaintenanceLog>) {
+private fun HistorySection(logs: List<MaintenanceLog>, onLogClick: (MaintenanceLog) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         SectionTitle(stringResource(R.string.plant_history_title))
         if (logs.isEmpty()) {
@@ -312,7 +396,7 @@ private fun HistorySection(logs: List<MaintenanceLog>) {
             Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
                 logs.forEachIndexed { index, log ->
                     if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    LogRow(log)
+                    LogRow(log, onClick = { onLogClick(log) })
                 }
             }
         }
@@ -320,11 +404,12 @@ private fun HistorySection(logs: List<MaintenanceLog>) {
 }
 
 @Composable
-private fun LogRow(log: MaintenanceLog) {
+private fun LogRow(log: MaintenanceLog, onClick: () -> Unit) {
     val visual = maintenanceTypeVisual(log.typeName)
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = onClick)
             .padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -337,23 +422,6 @@ private fun LogRow(log: MaintenanceLog) {
             color = MaterialTheme.colorScheme.onSurface,
         )
         Text(text = formatPerformedAt(log.performedAt), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    }
-}
-
-/** Ícone e cores de um tipo de manutenção, como no canvas. Tipo desconhecido usa o calendário. */
-private data class MaintenanceTypeVisual(@DrawableRes val icon: Int, val container: Color, val content: Color)
-
-@Composable
-private fun maintenanceTypeVisual(typeName: String): MaintenanceTypeVisual {
-    val scheme = MaterialTheme.colorScheme
-    val garden = GardenTheme.colors
-    return when (typeName.lowercase()) {
-        "rega" -> MaintenanceTypeVisual(R.drawable.ic_water, garden.waterContainer, garden.water)
-        "adubação" -> MaintenanceTypeVisual(R.drawable.ic_sprout, scheme.primaryContainer, scheme.primary)
-        "poda" -> MaintenanceTypeVisual(R.drawable.ic_scissors, scheme.primaryContainer, scheme.primary)
-        "replante" -> MaintenanceTypeVisual(R.drawable.ic_leaf, scheme.primaryContainer, scheme.primary)
-        "mudança de ambiente" -> MaintenanceTypeVisual(R.drawable.ic_home, scheme.surfaceVariant, scheme.onSurfaceVariant)
-        else -> MaintenanceTypeVisual(R.drawable.ic_calendar, scheme.surfaceVariant, scheme.onSurfaceVariant)
     }
 }
 
@@ -371,17 +439,24 @@ private fun PlantDetailPreview() {
                 species = Species("s1", "Monstera deliciosa", "Araceae", SpeciesCategory.Foliage, "Costela-de-adão"),
                 maintenance = PlantMaintenance(
                     schedules = listOf(
-                        MaintenanceSchedule("m1", "Rega", now.minusDays(2), overdue = true),
-                        MaintenanceSchedule("m2", "Adubação", now.plusDays(12).toLocalDate().atStartOfDay(), overdue = false),
+                        MaintenanceSchedule("m1", "p1", "Monstrinha", "t1", "Rega", now.minusDays(2), overdue = true),
+                        MaintenanceSchedule("m2", "p1", "Monstrinha", "t2", "Adubação", now.plusDays(12).toLocalDate().atStartOfDay(), overdue = false),
                     ),
                     scheduleTotal = 2,
-                    logs = listOf(MaintenanceLog("l1", "Rega", now.minusDays(9)), MaintenanceLog("l2", "Poda", now.minusDays(21))),
+                    logs = listOf(
+                        MaintenanceLog("l1", "p1", "Monstrinha", "t1", "Rega", now.minusDays(9)),
+                        MaintenanceLog("l2", "p1", "Monstrinha", "t3", "Poda", now.minusDays(21)),
+                    ),
                     logTotal = 2,
                 ),
             ),
             onBack = {},
             onEdit = {},
             onRetry = {},
+            onRegister = {},
+            onSchedule = {},
+            onScheduleClick = {},
+            onLogClick = {},
         )
     }
 }

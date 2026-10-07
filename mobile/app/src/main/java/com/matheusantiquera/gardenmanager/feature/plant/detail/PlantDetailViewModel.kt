@@ -7,11 +7,13 @@ import com.matheusantiquera.gardenmanager.core.network.ApiResult
 import com.matheusantiquera.gardenmanager.core.network.toUiText
 import com.matheusantiquera.gardenmanager.core.ui.UiText
 import com.matheusantiquera.gardenmanager.data.maintenance.MaintenanceRepository
+import com.matheusantiquera.gardenmanager.data.maintenance.MaintenanceSchedule
 import com.matheusantiquera.gardenmanager.data.maintenance.PlantMaintenance
 import com.matheusantiquera.gardenmanager.data.plant.Plant
 import com.matheusantiquera.gardenmanager.data.plant.PlantRepository
 import com.matheusantiquera.gardenmanager.data.species.Species
 import com.matheusantiquera.gardenmanager.data.species.SpeciesRepository
+import com.matheusantiquera.gardenmanager.feature.maintenance.MaintenanceActions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
@@ -45,6 +47,11 @@ class PlantDetailViewModel @Inject constructor(
     val uiState: StateFlow<PlantDetailUiState> = _uiState.asStateFlow()
 
     private var loadJob: Job? = null
+
+    /** Sheet de ações e exclusão de um agendamento; excluir recarrega o detalhe. */
+    val actions = MaintenanceActions(maintenanceRepository, viewModelScope, onDeleted = { load() })
+
+    fun onScheduleClick(schedule: MaintenanceSchedule) = actions.openSheet(schedule)
 
     /**
      * Carrega (ou recarrega) o detalhe. A tela chama ao voltar a ficar visível, por exemplo depois de

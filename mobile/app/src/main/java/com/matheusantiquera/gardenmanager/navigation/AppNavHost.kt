@@ -51,7 +51,12 @@ import com.matheusantiquera.gardenmanager.feature.plant.encode
 import com.matheusantiquera.gardenmanager.feature.plant.form.PlantFormScreen
 import com.matheusantiquera.gardenmanager.feature.plant.list.PlantsScreen
 import com.matheusantiquera.gardenmanager.feature.plant.species.SpeciesPickerScreen
-import com.matheusantiquera.gardenmanager.feature.placeholder.PlaceholderScreen
+import com.matheusantiquera.gardenmanager.feature.maintenance.MAINTENANCE_RESULT_KEY
+import com.matheusantiquera.gardenmanager.feature.maintenance.MaintenanceResult
+import com.matheusantiquera.gardenmanager.feature.maintenance.detail.LogDetailScreen
+import com.matheusantiquera.gardenmanager.feature.maintenance.form.LogFormScreen
+import com.matheusantiquera.gardenmanager.feature.maintenance.form.ScheduleFormScreen
+import com.matheusantiquera.gardenmanager.feature.schedule.ScheduleScreen
 import com.matheusantiquera.gardenmanager.feature.profile.ProfileScreen
 
 /**
@@ -168,7 +173,15 @@ private fun MainNavHost() {
                     onNewPlant = { environmentId -> entry.ifResumed { navController.navigate(PlantFormRoute(environmentId = environmentId)) } },
                 )
             }
-            composable<ScheduleRoute> { PlaceholderScreen(R.string.nav_schedule, R.drawable.ic_calendar) }
+            composable<ScheduleRoute> { entry ->
+                ScheduleScreen(
+                    result = entry.enumResult<MaintenanceResult>(MAINTENANCE_RESULT_KEY),
+                    onResultShown = { entry.clearResult(MAINTENANCE_RESULT_KEY) },
+                    onComplete = { entry.ifResumed { navController.navigate(LogFormRoute(plantId = it.plantId, scheduleId = it.id)) } },
+                    onEditSchedule = { entry.ifResumed { navController.navigate(ScheduleFormRoute(plantId = it.plantId, id = it.id)) } },
+                    onLogClick = { entry.ifResumed { navController.navigate(LogDetailRoute(id = it.id)) } },
+                )
+            }
             composable<ProfileRoute> { ProfileScreen() }
 
             composable<ArchivedEnvironmentsRoute> { entry ->
@@ -195,8 +208,38 @@ private fun MainNavHost() {
                 PlantDetailScreen(
                     formResult = entry.enumResult<PlantFormResult>(PLANT_FORM_RESULT_KEY),
                     onFormResultShown = { entry.clearResult(PLANT_FORM_RESULT_KEY) },
+                    maintenanceResult = entry.enumResult<MaintenanceResult>(MAINTENANCE_RESULT_KEY),
+                    onMaintenanceResultShown = { entry.clearResult(MAINTENANCE_RESULT_KEY) },
                     onBack = { entry.ifResumed { navController.popBackStack() } },
                     onEdit = { entry.ifResumed { navController.navigate(PlantFormRoute(id = plantId)) } },
+                    onRegister = { entry.ifResumed { navController.navigate(LogFormRoute(plantId = plantId)) } },
+                    onSchedule = { entry.ifResumed { navController.navigate(ScheduleFormRoute(plantId = plantId)) } },
+                    onCompleteSchedule = { entry.ifResumed { navController.navigate(LogFormRoute(plantId = plantId, scheduleId = it.id)) } },
+                    onEditSchedule = { entry.ifResumed { navController.navigate(ScheduleFormRoute(plantId = plantId, id = it.id)) } },
+                    onOpenLog = { log, readOnly -> entry.ifResumed { navController.navigate(LogDetailRoute(id = log.id, readOnly = readOnly)) } },
+                )
+            }
+            composable<ScheduleFormRoute> { entry ->
+                ScheduleFormScreen(
+                    onClose = { entry.ifResumed { navController.popBackStack() } },
+                    onDone = { result -> navController.finishMaintenanceForm(result) },
+                )
+            }
+            composable<LogDetailRoute> { entry ->
+                val route = entry.toRoute<LogDetailRoute>()
+                LogDetailScreen(
+                    result = entry.enumResult<MaintenanceResult>(MAINTENANCE_RESULT_KEY),
+                    onResultShown = { entry.clearResult(MAINTENANCE_RESULT_KEY) },
+                    onBack = { entry.ifResumed { navController.popBackStack() } },
+                    onEdit = { log -> entry.ifResumed { navController.navigate(LogFormRoute(plantId = log.plantId, id = log.id)) } },
+                    onDeleted = { result -> navController.finishMaintenanceForm(result) },
+                    readOnly = route.readOnly,
+                )
+            }
+            composable<LogFormRoute> { entry ->
+                LogFormScreen(
+                    onClose = { entry.ifResumed { navController.popBackStack() } },
+                    onDone = { result -> navController.finishMaintenanceForm(result) },
                 )
             }
             composable<PlantFormRoute> { entry ->
@@ -232,6 +275,12 @@ private fun MainNavHost() {
             }
         }
     }
+}
+
+/** Fecha um formulário de manutenção deixando o [result] para a tela de onde ele foi aberto mostrar a mensagem. */
+private fun NavHostController.finishMaintenanceForm(result: MaintenanceResult) {
+    previousBackStackEntry?.savedStateHandle?.set(MAINTENANCE_RESULT_KEY, result.name)
+    popBackStack()
 }
 
 /**
