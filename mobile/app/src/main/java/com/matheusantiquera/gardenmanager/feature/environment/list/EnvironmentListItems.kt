@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -25,9 +26,17 @@ import com.matheusantiquera.gardenmanager.R
 import com.matheusantiquera.gardenmanager.core.designsystem.InfoChip
 import com.matheusantiquera.gardenmanager.data.environment.Environment
 
-/** Card de um ambiente: nome, observações, plantas ativas e, quando houver, manutenções atrasadas. */
+/**
+ * Card de um ambiente: nome, observações, plantas ativas e, quando houver, manutenções atrasadas. Com
+ * [onEdit], o lápis à direita abre a edição no lugar da seta; sem ele, o card inteiro é um só toque.
+ */
 @Composable
-internal fun EnvironmentCard(environment: Environment, onClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun EnvironmentCard(
+    environment: Environment,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    onEdit: (() -> Unit)? = null,
+) {
     Surface(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
@@ -73,12 +82,23 @@ internal fun EnvironmentCard(environment: Environment, onClick: () -> Unit, modi
                     }
                 }
             }
-            Icon(
-                painter = painterResource(R.drawable.ic_chevron_right),
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            if (onEdit != null) {
+                IconButton(onClick = onEdit, modifier = Modifier.size(48.dp)) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_edit),
+                        contentDescription = stringResource(R.string.environment_edit_named, environment.name),
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            } else {
+                Icon(
+                    painter = painterResource(R.drawable.ic_chevron_right),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

@@ -21,8 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -30,6 +31,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.matheusantiquera.gardenmanager.R
 import com.matheusantiquera.gardenmanager.core.session.SessionState
 import com.matheusantiquera.gardenmanager.feature.auth.login.LoginScreen
@@ -39,6 +41,16 @@ import com.matheusantiquera.gardenmanager.feature.environment.form.EnvironmentFo
 import com.matheusantiquera.gardenmanager.feature.environment.form.EnvironmentFormScreen
 import com.matheusantiquera.gardenmanager.feature.environment.list.ArchivedEnvironmentsScreen
 import com.matheusantiquera.gardenmanager.feature.environment.list.EnvironmentsScreen
+import com.matheusantiquera.gardenmanager.feature.plant.PICKED_SPECIES_KEY
+import com.matheusantiquera.gardenmanager.feature.plant.PLANTS_ENVIRONMENT_FILTER_KEY
+import com.matheusantiquera.gardenmanager.feature.plant.PLANT_FORM_RESULT_KEY
+import com.matheusantiquera.gardenmanager.feature.plant.PlantFormResult
+import com.matheusantiquera.gardenmanager.feature.plant.decodeSpeciesPick
+import com.matheusantiquera.gardenmanager.feature.plant.detail.PlantDetailScreen
+import com.matheusantiquera.gardenmanager.feature.plant.encode
+import com.matheusantiquera.gardenmanager.feature.plant.form.PlantFormScreen
+import com.matheusantiquera.gardenmanager.feature.plant.list.PlantsScreen
+import com.matheusantiquera.gardenmanager.feature.plant.species.SpeciesPickerScreen
 import com.matheusantiquera.gardenmanager.feature.placeholder.PlaceholderScreen
 import com.matheusantiquera.gardenmanager.feature.profile.ProfileScreen
 
@@ -131,32 +143,45 @@ private fun MainNavHost() {
                 .statusBarsPadding(),
         ) {
             composable<EnvironmentsRoute> { entry ->
-                val formResult = entry.environmentFormResult()
-                // Na Etapa 3, o toque no card passa a abrir a aba Plantas filtrada pelo ambiente, como no canvas.
                 EnvironmentsScreen(
-                    formResult = formResult,
-                    onFormResultShown = { entry.clearEnvironmentFormResult() },
-                    onEnvironmentClick = { navController.navigate(EnvironmentFormRoute(id = it.id)) },
-                    onNewEnvironment = { navController.navigate(EnvironmentFormRoute()) },
-                    onShowArchived = { navController.navigate(ArchivedEnvironmentsRoute) },
+                    formResult = entry.enumResult<EnvironmentFormResult>(ENVIRONMENT_FORM_RESULT_KEY),
+                    onFormResultShown = { entry.clearResult(ENVIRONMENT_FORM_RESULT_KEY) },
+                    // Como no canvas: o card abre a aba Plantas filtrada pelo ambiente; o lápis abre a edição.
+                    onEnvironmentClick = { environment ->
+                        entry.ifResumed {
+                            navController.navigateToTopLevel(PlantsRoute)
+                            navController.getBackStackEntry<PlantsRoute>().savedStateHandle[PLANTS_ENVIRONMENT_FILTER_KEY] = environment.id
+                        }
+                    },
+                    onEditEnvironment = { entry.ifResumed { navController.navigate(EnvironmentFormRoute(id = it.id)) } },
+                    onNewEnvironment = { entry.ifResumed { navController.navigate(EnvironmentFormRoute()) } },
+                    onShowArchived = { entry.ifResumed { navController.navigate(ArchivedEnvironmentsRoute) } },
                 )
             }
-            composable<PlantsRoute> { PlaceholderScreen(R.string.nav_plants, R.drawable.ic_leaf) }
+            composable<PlantsRoute> { entry ->
+                PlantsScreen(
+                    environmentFilterRequest = entry.stringResult(PLANTS_ENVIRONMENT_FILTER_KEY),
+                    onEnvironmentFilterRequestConsumed = { entry.clearResult(PLANTS_ENVIRONMENT_FILTER_KEY) },
+                    plantFormResult = entry.enumResult<PlantFormResult>(PLANT_FORM_RESULT_KEY),
+                    onPlantFormResultShown = { entry.clearResult(PLANT_FORM_RESULT_KEY) },
+                    onPlantClick = { entry.ifResumed { navController.navigate(PlantDetailRoute(id = it.id)) } },
+                    onNewPlant = { environmentId -> entry.ifResumed { navController.navigate(PlantFormRoute(environmentId = environmentId)) } },
+                )
+            }
             composable<ScheduleRoute> { PlaceholderScreen(R.string.nav_schedule, R.drawable.ic_calendar) }
             composable<ProfileRoute> { ProfileScreen() }
 
             composable<ArchivedEnvironmentsRoute> { entry ->
-                val formResult = entry.environmentFormResult()
                 ArchivedEnvironmentsScreen(
-                    formResult = formResult,
-                    onFormResultShown = { entry.clearEnvironmentFormResult() },
-                    onBack = { navController.popBackStack() },
-                    onEnvironmentClick = { navController.navigate(EnvironmentFormRoute(id = it.id)) },
+                    formResult = entry.enumResult<EnvironmentFormResult>(ENVIRONMENT_FORM_RESULT_KEY),
+                    onFormResultShown = { entry.clearResult(ENVIRONMENT_FORM_RESULT_KEY) },
+                    onBack = { entry.ifResumed { navController.popBackStack() } },
+                    onEnvironmentClick = { entry.ifResumed { navController.navigate(EnvironmentFormRoute(id = it.id)) } },
                 )
             }
-            composable<EnvironmentFormRoute> {
+            composable<EnvironmentFormRoute> { entry ->
                 EnvironmentFormScreen(
-                    onClose = { navController.popBackStack() },
+                    onClose = { entry.ifResumed { navController.popBackStack() } },
                     onDone = { result ->
                         // Deixa o resultado para a tela de onde o formulário foi aberto mostrar a mensagem.
                         navController.previousBackStackEntry?.savedStateHandle?.set(ENVIRONMENT_FORM_RESULT_KEY, result.name)
@@ -164,19 +189,78 @@ private fun MainNavHost() {
                     },
                 )
             }
+
+            composable<PlantDetailRoute> { entry ->
+                val plantId = entry.toRoute<PlantDetailRoute>().id
+                PlantDetailScreen(
+                    formResult = entry.enumResult<PlantFormResult>(PLANT_FORM_RESULT_KEY),
+                    onFormResultShown = { entry.clearResult(PLANT_FORM_RESULT_KEY) },
+                    onBack = { entry.ifResumed { navController.popBackStack() } },
+                    onEdit = { entry.ifResumed { navController.navigate(PlantFormRoute(id = plantId)) } },
+                )
+            }
+            composable<PlantFormRoute> { entry ->
+                PlantFormScreen(
+                    speciesPick = entry.stringResult(PICKED_SPECIES_KEY)?.let(::decodeSpeciesPick),
+                    onSpeciesPickConsumed = { entry.clearResult(PICKED_SPECIES_KEY) },
+                    onClose = { entry.ifResumed { navController.popBackStack() } },
+                    onPickSpecies = { entry.ifResumed { navController.navigate(SpeciesPickerRoute(selectedId = it)) } },
+                    onDone = { result ->
+                        if (result == PlantFormResult.Deleted) {
+                            // A planta não existe mais: volta direto para a lista, pulando o detalhe.
+                            navController.popBackStack<PlantsRoute>(inclusive = false)
+                            navController.getBackStackEntry<PlantsRoute>().savedStateHandle[PLANT_FORM_RESULT_KEY] = result.name
+                        } else {
+                            // Criada volta para a lista; editada, para o detalhe.
+                            navController.previousBackStackEntry?.savedStateHandle?.set(PLANT_FORM_RESULT_KEY, result.name)
+                            navController.popBackStack()
+                        }
+                    },
+                )
+            }
+            composable<SpeciesPickerRoute> { entry ->
+                SpeciesPickerScreen(
+                    onClose = { entry.ifResumed { navController.popBackStack() } },
+                    onPick = { pick ->
+                        entry.ifResumed {
+                            // Deixa a escolha para o formulário de onde o seletor foi aberto.
+                            navController.previousBackStackEntry?.savedStateHandle?.set(PICKED_SPECIES_KEY, pick.encode())
+                            navController.popBackStack()
+                        }
+                    },
+                )
+            }
         }
     }
 }
 
-/** Resultado que o formulário de ambiente deixou nesta entrada da pilha, ou nulo. */
-@Composable
-private fun NavBackStackEntry.environmentFormResult(): EnvironmentFormResult? {
-    val name by savedStateHandle.getStateFlow<String?>(ENVIRONMENT_FORM_RESULT_KEY, null).collectAsStateWithLifecycle()
-    return name?.let { runCatching { EnvironmentFormResult.valueOf(it) }.getOrNull() }
+/**
+ * Executa [action] só com esta tela ativa. Durante a animação de troca de tela, a que está saindo ainda
+ * recebe toques; sem isso, um toque rápido logo depois de trocar de aba acertava um botão da tela
+ * anterior que estivesse no mesmo lugar.
+ */
+private inline fun NavBackStackEntry.ifResumed(action: () -> Unit) {
+    if (lifecycle.currentState == Lifecycle.State.RESUMED) action()
 }
 
-private fun NavBackStackEntry.clearEnvironmentFormResult() {
-    savedStateHandle[ENVIRONMENT_FORM_RESULT_KEY] = null
+/**
+ * Valor que outra tela deixou no `savedStateHandle` desta entrada da pilha (o resultado de um formulário,
+ * a escolha de um seletor, um filtro pedido), ou nulo. É lido aqui, na tela, e repassado ao ViewModel:
+ * o `SavedStateHandle` que o ViewModel recebe não é o mesmo desta entrada e não enxerga esses valores.
+ */
+@Composable
+private fun NavBackStackEntry.stringResult(key: String): String? {
+    val value by savedStateHandle.getStateFlow<String?>(key, null).collectAsStateWithLifecycle()
+    return value
+}
+
+/** Como [stringResult], para resultados guardados pelo nome de uma constante de enum. */
+@Composable
+private inline fun <reified T : Enum<T>> NavBackStackEntry.enumResult(key: String): T? =
+    stringResult(key)?.let { name -> enumValues<T>().firstOrNull { it.name == name } }
+
+private fun NavBackStackEntry.clearResult(key: String) {
+    savedStateHandle[key] = null
 }
 
 /** Troca de aba como a barra inferior faz: preserva o estado de cada aba e não empilha abas repetidas. */

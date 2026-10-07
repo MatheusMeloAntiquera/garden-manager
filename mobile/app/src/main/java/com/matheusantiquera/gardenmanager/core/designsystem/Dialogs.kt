@@ -2,7 +2,9 @@ package com.matheusantiquera.gardenmanager.core.designsystem
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -49,7 +51,8 @@ fun ProgressDialog(text: String) {
 
 /**
  * Confirmação de exclusão do canvas: lixeira em círculo vermelho, título, explicação e os botões
- * "Cancelar" e "Excluir". Enquanto [deleting], o diálogo não fecha e o botão mostra o carregamento.
+ * "Cancelar" e "Excluir". [note], quando houver, aparece num quadro de dica abaixo da explicação.
+ * Enquanto [deleting], o diálogo não fecha e o botão mostra o carregamento.
  */
 @Composable
 fun ConfirmDeleteDialog(
@@ -58,6 +61,7 @@ fun ConfirmDeleteDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
     deleting: Boolean = false,
+    note: String? = null,
 ) {
     AlertDialog(
         onDismissRequest = { if (!deleting) onDismiss() },
@@ -79,12 +83,31 @@ fun ConfirmDeleteDialog(
             Text(text = title, style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
         },
         text = {
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                note?.let {
+                    Surface(shape = MaterialTheme.shapes.small, color = MaterialTheme.colorScheme.surfaceVariant) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_info),
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                            Text(text = it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                        }
+                    }
+                }
+            }
         },
         confirmButton = {
             Button(

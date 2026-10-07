@@ -11,7 +11,12 @@ Aplicativo Android desenvolvido em Kotlin com Jetpack Compose. O design das tela
   - cards com a quantidade de plantas ativas e de manutenções atrasadas de cada ambiente;
   - criar, editar, arquivar (desativar), reativar e excluir ambientes, com aviso de "Salvando…" e mensagem de confirmação;
   - os ambientes arquivados ficam em "Ver arquivados", no fim da lista.
-- Abas Plantas e Agenda ainda são telas provisórias ("Em breve").
+- Aba Plantas:
+  - busca por apelido ou espécie, filtros por ambiente e "Arquivadas", com a lista carregada aos poucos ao rolar;
+  - o card de um ambiente abre a aba já filtrada; o lápis do card abre a edição do ambiente;
+  - detalhe da planta com espécie, família, categoria, observações, próximas manutenções e histórico;
+  - criar, editar, arquivar (desativar), reativar e excluir plantas, com a espécie escolhida por busca no catálogo.
+- Aba Agenda ainda é uma tela provisória ("Em breve"); registrar e agendar manutenções entram com ela.
 
 ## Stack
 
