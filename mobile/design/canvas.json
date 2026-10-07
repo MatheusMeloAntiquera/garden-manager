@@ -16,7 +16,6 @@
     "ConfirmarExcluirPlanta.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Confirmar: excluir planta", "w": 390, "x": 940, "y": 3708 },
     "AcoesAgendamento.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Ações do agendamento", "w": 390, "x": 1410, "y": 3708 },
     "ConfirmarExcluirAgendamento.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Confirmar: excluir agendamento", "w": 390, "x": 1880, "y": 3708 },
-    "AcoesRegistro.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Ações do registro", "w": 390, "x": 2350, "y": 3708 },
     "ConfirmarExcluirRegistro.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Confirmar: excluir registro", "w": 390, "x": 2820, "y": 3708 },
     "NovoAmbiente.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Novo ambiente", "w": 390, "x": 0, "y": 4672 },
     "AmbientesArquivados.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Ambientes arquivados", "w": 390, "x": 470, "y": 4672 },
@@ -27,7 +26,16 @@
     "EscolherEspecie.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Escolher espécie", "w": 390, "x": 470, "y": 5636 },
     "SalvandoPlanta.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Salvando planta", "w": 390, "x": 940, "y": 5636 },
     "ExcluindoPlanta.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Excluindo planta", "w": 390, "x": 1410, "y": 5636 },
-    "PlantaCriada.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Plantas: mensagem de criada", "w": 390, "x": 1880, "y": 5636 }
+    "PlantaCriada.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Plantas: mensagem de criada", "w": 390, "x": 1880, "y": 5636 },
+    "DetalhePlantaArquivada.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Detalhe da planta arquivada", "w": 390, "x": 3760, "y": 6600 },
+    "AgendaHistorico.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Agenda: histórico", "w": 390, "x": 0, "y": 6600 },
+    "FormAgendamento.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Agendar manutenção", "w": 390, "x": 470, "y": 6600 },
+    "FormRegistro.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Registrar manutenção", "w": 390, "x": 940, "y": 6600 },
+    "SalvandoManutencao.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Salvando agendamento", "w": 390, "x": 1410, "y": 6600 },
+    "SalvandoRegistro.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Salvando registro", "w": 390, "x": 1880, "y": 6600 },
+    "ManutencaoAgendada.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Detalhe da planta: mensagem de agendada", "w": 390, "x": 2350, "y": 6600 },
+    "ManutencaoRegistrada.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Agenda: mensagem de registrada", "w": 390, "x": 2820, "y": 6600 },
+    "DetalheRegistro.dc.html": { "h": 844, "is_interactive": true, "radius": 28, "title": "Detalhe do registro", "w": 390, "x": 3290, "y": 6600 }
   },
   "createdOnFiles": { "at": "2026-10-01T12:00:00Z", "v": 1 },
   "designSystems": [],
@@ -38,6 +46,7 @@
     "linhaC": { "kind": "title1", "maxW": 3210, "text": "Edição e exclusões", "x": 0, "y": 3408 },
     "linhaD": { "kind": "title1", "maxW": 2270, "text": "Ambientes: telas e estados novos", "w": 240, "x": 0, "y": 4372 },
     "linhaE": { "kind": "title1", "maxW": 2270, "text": "Plantas: telas e estados novos", "w": 240, "x": 0, "y": 5336 },
+    "linhaF": { "kind": "title1", "maxW": 4150, "text": "Manutenções: histórico, formulários e estados novos", "w": 240, "x": 0, "y": 6300 },
     "paleta": { "kind": "title1", "maxW": 1200, "text": "Paleta e tipografia", "w": 240, "x": 0, "y": -300 }
   },
   "order": [
@@ -55,7 +64,6 @@
     "ConfirmarExcluirPlanta.dc.html",
     "AcoesAgendamento.dc.html",
     "ConfirmarExcluirAgendamento.dc.html",
-    "AcoesRegistro.dc.html",
     "ConfirmarExcluirRegistro.dc.html",
     "NovoAmbiente.dc.html",
     "AmbientesArquivados.dc.html",
@@ -66,7 +74,16 @@
     "EscolherEspecie.dc.html",
     "SalvandoPlanta.dc.html",
     "ExcluindoPlanta.dc.html",
-    "PlantaCriada.dc.html"
+    "PlantaCriada.dc.html",
+    "AgendaHistorico.dc.html",
+    "FormAgendamento.dc.html",
+    "FormRegistro.dc.html",
+    "SalvandoManutencao.dc.html",
+    "SalvandoRegistro.dc.html",
+    "ManutencaoAgendada.dc.html",
+    "ManutencaoRegistrada.dc.html",
+    "DetalheRegistro.dc.html",
+    "DetalhePlantaArquivada.dc.html"
   ],
   "pages": [],
   "title": "Garden Manager — Telas do App"
