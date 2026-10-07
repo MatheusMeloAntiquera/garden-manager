@@ -5,8 +5,6 @@
     <!-- Comum -->
     <string name="action_back">Voltar</string>
     <string name="action_retry">Tentar de novo</string>
-    <string name="coming_soon">Em breve</string>
-    <string name="coming_soon_description">Esta área ainda está sendo construída.</string>
 
     <!-- Erros -->
     <string name="error_network">Não foi possível conectar ao servidor. Verifique sua conexão e tente de novo.</string>
@@ -241,4 +239,84 @@
     <string name="species_picker_empty_title">Nenhuma espécie encontrada</string>
     <string name="species_picker_empty_description">Confira o texto da busca ou tente pelo nome científico.</string>
     <string name="species_picker_selected">Selecionada</string>
+
+    <!-- Agenda -->
+    <string name="schedule_title">Agenda</string>
+    <string name="schedule_tab_pending">Pendentes</string>
+    <string name="schedule_tab_history">Histórico</string>
+    <string name="schedule_group_overdue">Atrasadas</string>
+    <string name="schedule_group_this_week">Esta semana</string>
+    <string name="schedule_group_later">Mais tarde</string>
+    <string name="schedule_complete">Concluir %1$s de %2$s</string>
+    <string name="schedule_load_error">Não foi possível carregar a agenda.</string>
+    <string name="schedule_empty_pending_title">Nada pendente</string>
+    <string name="schedule_empty_pending_description">Agende uma manutenção pelo botão “Agendar” no detalhe de uma planta.</string>
+    <string name="schedule_empty_history_title">Nenhuma manutenção registrada</string>
+    <string name="schedule_empty_history_description">O que você fizer pelo botão “Registrar” ou concluindo um agendamento aparece aqui.</string>
+
+    <!-- Prazos de manutenção -->
+    <string name="maintenance_due_overdue_today">Venceu hoje, %1$s</string>
+    <string name="maintenance_due_overdue_yesterday">Venceu ontem</string>
+    <plurals name="maintenance_due_overdue_days">
+        <item quantity="one">Venceu há %d dia</item>
+        <item quantity="many">Venceu há %d dias</item>
+        <item quantity="other">Venceu há %d dias</item>
+    </plurals>
+    <string name="maintenance_due_today">Hoje, %1$s</string>
+    <string name="maintenance_due_tomorrow">Amanhã, %1$s</string>
+    <string name="maintenance_log_subtitle">Feita em %1$s</string>
+    <string name="maintenance_log_subtitle_from_schedule">Feita em %1$s · a partir de agendamento</string>
+
+    <!-- Ações de manutenção (sheets e exclusão) -->
+    <string name="maintenance_action_complete">Concluir</string>
+    <string name="maintenance_action_edit_schedule">Editar agendamento</string>
+    <string name="maintenance_action_delete_schedule">Excluir agendamento</string>
+    <string name="maintenance_action_edit_log">Editar registro</string>
+    <string name="maintenance_action_delete_log">Excluir registro</string>
+    <string name="maintenance_deleting">Excluindo…</string>
+    <string name="maintenance_schedule_delete_title">Excluir agendamento?</string>
+    <string name="maintenance_schedule_delete_message">O agendamento &lt;b&gt;%1$s&lt;/b&gt; será cancelado. Essa ação não pode ser desfeita.</string>
+    <string name="maintenance_log_delete_title">Excluir registro?</string>
+    <string name="maintenance_log_delete_message">O registro &lt;b&gt;%1$s&lt;/b&gt; será removido do histórico. Essa ação não pode ser desfeita.</string>
+    <string name="maintenance_schedule_created">Manutenção agendada</string>
+    <string name="maintenance_schedule_updated">Agendamento atualizado</string>
+    <string name="maintenance_schedule_deleted">Agendamento excluído</string>
+    <string name="maintenance_log_created">Manutenção registrada</string>
+    <string name="maintenance_log_updated">Registro atualizado</string>
+    <string name="maintenance_log_deleted">Registro excluído</string>
+
+    <!-- Detalhe do registro -->
+    <string name="log_detail_subtitle">Manutenção registrada</string>
+    <string name="log_detail_load_error">Não foi possível carregar o registro.</string>
+    <string name="log_detail_plant">Planta</string>
+    <string name="log_detail_performed_at">Feita em</string>
+    <string name="log_detail_origin">Origem</string>
+    <string name="log_detail_origin_schedule">A partir de agendamento</string>
+    <string name="log_detail_origin_manual">Registro avulso</string>
+    <string name="log_detail_no_notes">Sem observações.</string>
+
+    <!-- Detalhe da planta: ações -->
+    <string name="plant_action_register">Registrar</string>
+    <string name="plant_action_schedule">Agendar</string>
+
+    <!-- Formulários de manutenção -->
+    <string name="action_ok">OK</string>
+    <string name="schedule_form_new_title">Agendar manutenção</string>
+    <string name="schedule_form_edit_title">Editar agendamento</string>
+    <string name="log_form_new_title">Registrar manutenção</string>
+    <string name="log_form_edit_title">Editar registro</string>
+    <string name="log_form_from_schedule">Este registro nasceu de um agendamento.</string>
+    <string name="maintenance_form_load_error">Não foi possível carregar o formulário.</string>
+    <string name="maintenance_form_plant">Planta</string>
+    <string name="maintenance_form_type">Tipo de manutenção</string>
+    <string name="maintenance_form_type_placeholder">Escolha o tipo</string>
+    <string name="maintenance_form_time_dialog_title">Escolher hora</string>
+    <string name="maintenance_saving">Salvando…</string>
+    <string name="schedule_form_date">Data do prazo</string>
+    <string name="schedule_form_time">Hora</string>
+    <string name="log_form_date">Data</string>
+    <string name="log_form_time">Hora</string>
+    <string name="field_maintenance_notes_placeholder">Ex.: Meio litro de água</string>
+    <string name="validation_maintenance_type_required">Escolha o tipo de manutenção.</string>
+    <string name="validation_maintenance_performed_in_future">A data e a hora não podem estar no futuro.</string>
 </resources>

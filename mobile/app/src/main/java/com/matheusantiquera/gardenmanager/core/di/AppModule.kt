@@ -7,6 +7,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import java.time.Clock
 import javax.inject.Qualifier
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -28,5 +29,10 @@ abstract class AppModule {
         @Singleton
         @ApplicationScope
         fun provideApplicationScope(): CoroutineScope = CoroutineScope(SupervisorJob())
+
+        /** Relógio do app, trocável nos testes para fixar "agora" (padrão de data e hora dos formulários). */
+        @Provides
+        @Singleton
+        fun provideClock(): Clock = Clock.systemDefaultZone()
     }
 }

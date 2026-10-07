@@ -43,6 +43,21 @@ data class PlantDetailRoute(val id: String)
 @Serializable
 data class PlantFormRoute(val id: String? = null, val environmentId: String? = null)
 
+/** Formulário de agendamento de uma planta: com [id] edita, sem ele cria um novo. A planta é fixa. */
+@Serializable
+data class ScheduleFormRoute(val plantId: String, val id: String? = null)
+
+/** Detalhe de uma execução. Com [readOnly] (execução de planta arquivada), não oferece editar nem excluir. */
+@Serializable
+data class LogDetailRoute(val id: String, val readOnly: Boolean = false)
+
+/**
+ * Formulário de registro de uma manutenção feita: com [id] edita uma execução; com [scheduleId] conclui
+ * aquele agendamento; sem os dois registra uma manutenção avulsa. A planta é fixa.
+ */
+@Serializable
+data class LogFormRoute(val plantId: String, val id: String? = null, val scheduleId: String? = null)
+
 /** Busca no catálogo de espécies. [selectedId] é a espécie atual da planta, marcada na lista. */
 @Serializable
 data class SpeciesPickerRoute(val selectedId: String? = null)

@@ -16,7 +16,12 @@ Aplicativo Android desenvolvido em Kotlin com Jetpack Compose. O design das tela
   - o card de um ambiente abre a aba já filtrada; o lápis do card abre a edição do ambiente;
   - detalhe da planta com espécie, família, categoria, observações, próximas manutenções e histórico;
   - criar, editar, arquivar (desativar), reativar e excluir plantas, com a espécie escolhida por busca no catálogo.
-- Aba Agenda ainda é uma tela provisória ("Em breve"); registrar e agendar manutenções entram com ela.
+- Detalhe da planta com os botões Registrar (manutenção feita) e Agendar; tocar num agendamento abre as ações dele (concluir, editar, excluir) e tocar numa execução do "Histórico" abre o detalhe do registro, com os botões Editar e Excluir. Planta arquivada não tem Registrar nem Agendar e fica só para leitura.
+- Aba Agenda:
+  - abas Pendentes e Histórico, com a lista carregada aos poucos ao rolar;
+  - só aparecem agendamentos e registros de plantas ativas (a API filtra com `plant_active=true`);
+  - pendentes agrupadas em Atrasadas (com a quantidade), Esta semana e Mais tarde; o ✓ conclui abrindo o registro já preenchido com o tipo e as observações do agendamento;
+  - agendar, registrar, editar e excluir manutenções, com aviso de "Salvando…" e mensagem de confirmação; o agendamento concluído sai dos pendentes e vira registro no histórico.
 
 ## Stack
 
@@ -34,7 +39,7 @@ app/src/main/java/com/matheusantiquera/gardenmanager/
 │   ├── di/             # módulos do Hilt
 │   └── ui/             # texto de tela (UiText) e máscara de data
 ├── data/auth/          # AuthApi/UserApi, DTOs e AuthRepository
-├── feature/            # uma pasta por funcionalidade (auth, profile, placeholder)
+├── feature/            # uma pasta por funcionalidade (auth, environment, plant, maintenance, schedule, profile)
 └── navigation/         # rotas e grafos (autenticação x app logado)
 ```
 
